@@ -23,11 +23,12 @@
 
 **Deuda/avisos conocidos:**
 - `npm audit`: postcss transitivo dentro de next (XSS moderado, no aplicable a nuestro uso, sin fix real). Revisar al actualizar Next.
-- Docker Desktop no estaba instalado en la máquina al cierre de Fase 0 — requisito para Fase 1.
+- ~~Docker Desktop no estaba instalado en la máquina al cierre de Fase 0~~ — resuelto: Docker funciona y los 3 contenedores levantan (ver «Entorno local y troubleshooting»).
+- Healthcheck de `meilisearch` reporta "unhealthy" siendo un falso negativo (detalle en «Entorno local y troubleshooting»); decisión de ajustarlo o dejarlo, pendiente.
 
 ## Estado de fases
 
-- [x] **Fase 0 — Setup del entorno** (commit `30d89df`): scaffold Next 15 + Tailwind v4 + shadcn/ui, ESLint/Prettier, docker-compose (Postgres/Redis/Meilisearch), `.env.example`, design tokens de marca, estructura de carpetas. *Pendiente de la fase: confirmación del usuario de que Docker levanta los 3 contenedores.*
+- [x] **Fase 0 — Setup del entorno** (commit `30d89df`): scaffold Next 15 + Tailwind v4 + shadcn/ui, ESLint/Prettier, docker-compose (Postgres/Redis/Meilisearch), `.env.example`, design tokens de marca, estructura de carpetas. ✅ Confirmado: Docker levanta los 3 contenedores y los servicios responden (ver nota sobre el healthcheck de Meilisearch en «Entorno local y troubleshooting»). Fase completa; el resto es contexto operativo.
 - [ ] **Fase 1 — Base de datos y autenticación**: `schema.prisma` completo, migraciones, seed (~20 productos con variantes), Auth.js.
 - [ ] **Fase 2 — Backend de catálogo**: endpoints products/categories/brands, filtros, Meilisearch, Zod.
 - [ ] **Fase 3 — Storefront: Home + PLP + PDP** con design system de marca.
@@ -78,6 +79,20 @@ npx shadcn@latest add X  # añadir componente shadcn (nunca editar components/ui
 ```
 
 Migraciones/seed y tests: se documentarán aquí al implementarse (Fase 1 y 7).
+
+## Entorno local y troubleshooting
+
+**Ubicación del proyecto — WSL nativo (2026-07-10).** El proyecto se movió de Windows (`C:\Users\Admin\Documents\Desarrollo`) al filesystem nativo de WSL (`~/projects/moodsense-web-store`). La migración se hizo mediante **clone limpio por SSH**, no por copia directa entre filesystems, para evitar problemas de permisos y de performance de I/O entre NTFS y ext4. El path de Windows queda obsoleto: no trabajar desde ahí.
+
+**Node.js — usar exclusivamente el de nvm (Linux).** El entorno requiere Node.js nativo de Linux instalado vía **nvm (v22)**. NO usar el Node de Windows ni el de apt/Ubuntu: mezclar cualquiera de esos provoca errores de rutas UNC o conflictos de PATH. Verificación rápida:
+
+```bash
+which node   # debe apuntar a ~/.nvm/versions/node/...
+```
+
+Si no apunta ahí, correr `nvm use 22` o revisar que `~/.bash_profile` cargue `~/.bashrc` (donde nvm se inicializa).
+
+**Healthcheck de Meilisearch — falso negativo conocido.** El servicio `meilisearch` de `docker-compose.yml` aparece como **"unhealthy"** en `docker compose ps` aunque funciona correctamente (confirmado vía `curl http://localhost:7700/health` desde el host). Es un falso negativo relacionado a cómo `wget` resuelve `localhost` dentro del propio contenedor. **Pendiente de decisión:** ajustar el healthcheck (ej. usar `127.0.0.1` en vez de `localhost`) o dejarlo así; no bloquea el desarrollo. Mientras tanto, ignorar ese estado y validar con el `curl` anterior si hay dudas.
 
 ## Convenciones del proyecto
 
