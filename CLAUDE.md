@@ -22,9 +22,10 @@
 | Auth.js (next-auth)   | 5.0 beta    | JWT strategy, Prisma adapter, Credentials + Google (opcional por env)                                                                                                                                                                         |
 | bcryptjs              | ^3          | hashing de contraseñas (cost 12), sin deps nativas                                                                                                                                                                                            |
 | Vitest                | ^4          | unitarias de `lib/` (config en `vitest.config.ts`, tests colocados `*.test.ts`)                                                                                                                                                               |
-| tsx                   | ^4          | runner del seed (`prisma db seed`)                                                                                                                                                                                                            |
+| tsx                   | ^4          | runner del seed (`prisma db seed`) y scripts (`scripts/`); resuelve el alias `@/` de tsconfig                                                                                                                                                 |
+| meilisearch (js)      | ^0.59       | ⚠️ la clase se llama `Meilisearch` y los errores `Meilisearch*` (minúscula «s», renombrado upstream — `MeiliSearch` ya no existe)                                                                                                             |
 
-**Pendiente de instalar (fases siguientes):** Zustand, Stripe SDK, ioredis, meilisearch-js, Playwright, Vercel Blob.
+**Pendiente de instalar (fases siguientes):** Zustand, Stripe SDK, ioredis, Playwright, Vercel Blob.
 
 **Deuda/avisos conocidos:**
 
@@ -36,7 +37,7 @@
 
 - [x] **Fase 0 — Setup del entorno** (commit `30d89df`): scaffold Next 15 + Tailwind v4 + shadcn/ui, ESLint/Prettier, docker-compose (Postgres/Redis/Meilisearch), `.env.example`, design tokens de marca, estructura de carpetas. ✅ Confirmado: Docker levanta los 3 contenedores y los servicios responden (ver nota sobre el healthcheck de Meilisearch en «Entorno local y troubleshooting»). Fase completa; el resto es contexto operativo.
 - [x] **Fase 1 — Base de datos y autenticación**: `schema.prisma` completo (auth + catálogo + comercio: User/Account/Session, Brand, Category jerárquica, Product, ProductVariant, ProductImage, Address, Order/OrderItem con snapshot, WishlistItem), migración `init` aplicada, seed con 6 marcas / 10 categorías / 20 productos / 73 variantes / 2 usuarios (ver credenciales en «Comandos útiles»), Auth.js v5 (JWT, Credentials + Google opcional, endpoint register, middleware de rol en `/admin`), `handleApiError` centralizado, 13 tests unitarios (validadores + password). Verificado E2E vía curl: register 201/409/400, login, sesión con rol, gate ADMIN/USER en `/admin`.
-- [ ] **Fase 2 — Backend de catálogo**: endpoints products/categories/brands, filtros, Meilisearch, Zod.
+- [x] **Fase 2 — Backend de catálogo**: `GET /api/products` (filtros: category —incluye hijas—, brand, gender, minPrice/maxPrice en centavos, onSale, featured; sort newest/price-asc/price-desc/name-asc; paginación page/perPage≤60), `GET /api/products/[slug]` (detalle PDP con brand, categoría+padre, imágenes, variantes; 404), `GET /api/categories` (árbol 2 niveles con productCount activo), `GET /api/brands` (con productCount), `GET /api/search` (Meilisearch: typo-tolerance, mismos filtros, sort por relevancia/precio/novedad). Solo productos `isActive` expuestos. Índice `products` con settings versionados en `lib/search/products-index.ts`, sync manual `npm run search:sync` (también crea la search key pública; el CRUD del admin lo disparará en Fase 6). 27 tests nuevos (40 total). Verificado E2E vía curl contra build de producción.
 - [ ] **Fase 3 — Storefront: Home + PLP + PDP** con design system de marca.
 - [ ] **Fase 4 — Carrito y checkout**: Zustand, Stripe Checkout + Webhooks, stock.
 - [ ] **Fase 5 — Cuenta de usuario**: perfil, direcciones, pedidos, wishlist.
@@ -57,6 +58,7 @@
 8. **Dinero siempre en centavos enteros** (`priceCents`, `totalCents`…): compatible con Stripe y sin errores de redondeo de flotantes. Convención obligatoria (ver rules.md).
 9. **Sesiones JWT (no database sessions)** con config de Auth.js dividida: `lib/auth/auth.config.ts` es edge-safe (sin Prisma/bcrypt) y la usa el middleware; `lib/auth/index.ts` añade adapter y providers para el runtime Node. El rol viaja en el token (callbacks `jwt`/`session`) y se re-verifica en servidor.
 10. **Pedidos con snapshot**: `Order`/`OrderItem` copian nombre, SKU, precio y dirección al momento de compra; las FK a catálogo son `SetNull` para que el historial sobreviva a borrados de productos.
+11. **Búsqueda: Postgres filtra, Meilisearch busca.** `/api/products` (PLP con filtros exactos) va directo a Prisma; `/api/search` (texto libre + typo-tolerance) va a Meilisearch con documentos desnormalizados. Los filtros de Meili se construyen escapando valores con `JSON.stringify` (previene inyección en la sintaxis de filtro). El browser solo recibe la search key pública scoped al índice `products`; la master key nunca sale del servidor. Sync del índice manual por ahora (`npm run search:sync`), idempotente.
 
 ## Design system (implementado en `app/globals.css`)
 
@@ -90,6 +92,7 @@ npm run db:seed          # re-seed idempotente (limpia catálogo, upserta usuari
 npm run db:generate      # regenerar cliente Prisma (también corre en postinstall)
 npm run db:studio        # Prisma Studio
 npm test                 # Vitest (unitarias de lib/) · test:watch para TDD
+npm run search:sync      # reindexar Meilisearch (settings + productos + search key)
 ```
 
 **Usuarios del seed (solo dev):** `admin@moodsense.dev` (ADMIN) y `cliente@moodsense.dev` (USER); contraseñas por defecto `admin1234` / `cliente1234`, sobreescribibles con `SEED_ADMIN_PASSWORD` / `SEED_USER_PASSWORD`.
