@@ -6,7 +6,8 @@ export class ApiError extends Error {
   constructor(
     readonly code: string,
     message: string,
-    readonly status: number
+    readonly status: number,
+    readonly details?: unknown
   ) {
     super(message);
     this.name = "ApiError";
@@ -38,7 +39,13 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorBody> {
 
   if (error instanceof ApiError) {
     return NextResponse.json(
-      { error: { code: error.code, message: error.message } },
+      {
+        error: {
+          code: error.code,
+          message: error.message,
+          ...(error.details !== undefined && { details: error.details }),
+        },
+      },
       { status: error.status }
     );
   }

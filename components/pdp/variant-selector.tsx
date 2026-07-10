@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/lib/cart/cart-store";
 import { formatPrice } from "@/lib/format/price";
 
 export type PdpVariant = {
@@ -15,21 +17,28 @@ export type PdpVariant = {
   stock: number;
 };
 
+export type PdpProductInfo = {
+  slug: string;
+  name: string;
+  brandName: string;
+  imageUrl: string | null;
+};
+
 const LOW_STOCK_THRESHOLD = 5;
 
-/**
- * Size/color picker. Variant price overrides the product base price.
- * Add-to-cart is a placeholder until the Phase 4 cart lands.
- */
+/** Size/color picker. Variant price overrides the product base price. */
 export function VariantSelector({
+  product,
   variants,
   basePriceCents,
   compareAtPriceCents,
 }: {
+  product: PdpProductInfo;
   variants: PdpVariant[];
   basePriceCents: number;
   compareAtPriceCents: number | null;
 }) {
+  const addItem = useCartStore((state) => state.addItem);
   const colors = [...new Set(variants.map((v) => v.color).filter((c): c is string => c !== null))];
   const [color, setColor] = useState<string | null>(colors[0] ?? null);
 
@@ -127,11 +136,35 @@ export function VariantSelector({
         size="lg"
         className="w-full rounded-none tracking-[0.2em] uppercase sm:w-auto sm:px-12"
         disabled={!selected || selected.stock === 0}
-        onClick={() =>
-          toast("Muy pronto", {
-            description: "El carrito estará disponible en breve. ¡Gracias por la paciencia!",
-          })
-        }
+        onClick={() => {
+          if (!selected) return;
+          addItem({
+            variantId: selected.id,
+            productSlug: product.slug,
+            name: product.name,
+            brandName: product.brandName,
+            size: selected.size,
+            color: selected.color,
+            sku: selected.sku,
+            unitPriceCents: selected.priceCents ?? basePriceCents,
+            imageUrl: product.imageUrl,
+            quantity: 1,
+            maxStock: selected.stock,
+          });
+          toast.success("Añadido al carrito", {
+            description: `${product.name}${selected.size ? ` · ${selected.size}` : ""}`,
+            action: (
+              <Button
+                size="sm"
+                variant="outline"
+                className="ml-auto"
+                render={<Link href="/cart" />}
+              >
+                Ver carrito
+              </Button>
+            ),
+          });
+        }}
       >
         {selected ? "Añadir al carrito" : hasSizes ? "Elige tu talla" : "Añadir al carrito"}
       </Button>

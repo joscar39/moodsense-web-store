@@ -1,7 +1,6 @@
-import { ShoppingBagIcon } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { CartButton } from "@/components/cart/cart-button";
 
 import { MobileNav } from "./mobile-nav";
 import { SearchForm } from "./search-form";
@@ -38,15 +37,7 @@ export function SiteHeader({ navLinks }: { navLinks: NavLink[] }) {
           <div className="hidden sm:block">
             <SearchForm />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Carrito (disponible próximamente)"
-            title="Carrito — disponible próximamente"
-            disabled
-          >
-            <ShoppingBagIcon className="size-5" />
-          </Button>
+          <CartButton />
         </div>
       </div>
       <div className="border-t px-4 py-2 sm:hidden">

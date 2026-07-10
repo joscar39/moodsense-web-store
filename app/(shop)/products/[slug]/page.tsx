@@ -109,6 +109,12 @@ export default async function ProductPage({ params }: { params: Params }) {
           </div>
 
           <VariantSelector
+            product={{
+              slug: product.slug,
+              name: product.name,
+              brandName: product.brand.name,
+              imageUrl: product.images[0]?.url ?? null,
+            }}
             variants={product.variants}
             basePriceCents={product.priceCents}
             compareAtPriceCents={product.compareAtPriceCents}
