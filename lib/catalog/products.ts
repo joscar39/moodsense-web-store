@@ -71,6 +71,15 @@ export async function listProducts(query: ProductListQuery) {
   };
 }
 
+/** Active product slugs, for generateStaticParams (ISR). */
+export async function listActiveProductSlugs() {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  });
+  return products.map((product) => product.slug);
+}
+
 /** Full product detail for the PDP. Throws NOT_FOUND (404) for unknown or inactive slugs. */
 export async function getProductBySlug(slug: string) {
   const product = await prisma.product.findFirst({

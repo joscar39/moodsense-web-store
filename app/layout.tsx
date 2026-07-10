@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Archivo, Geist_Mono, Playfair_Display } from "next/font/google";
+
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const sans = Archivo({
@@ -32,9 +35,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={`${sans.variable} ${serif.variable} ${mono.variable} antialiased`}>
         {children}
+        <Toaster position="bottom-center" />
       </body>
     </html>
   );
