@@ -38,6 +38,9 @@ yarn-error.log*
 .idea/
 .vscode/
 
+# Claude Code local (per-machine) settings
+.claude/settings.local.json
+
 # testing artifacts
 /playwright-report/
 /test-results/
@@ -48,3 +51,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/lib/generated/prisma
