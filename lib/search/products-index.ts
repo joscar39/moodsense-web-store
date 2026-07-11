@@ -75,6 +75,35 @@ export function buildProductDocument(product: ProductForIndex): ProductSearchDoc
   };
 }
 
+const productIndexInclude = {
+  brand: { select: { name: true, slug: true } },
+  category: { select: { name: true, slug: true, parent: { select: { slug: true } } } },
+  images: { select: { url: true, alt: true }, orderBy: { position: "asc" as const }, take: 1 },
+  variants: { select: { stock: true } },
+};
+
+/**
+ * Upserts (or removes, if deleted/inactive) a single product document.
+ * Fire-and-forget from admin CRUD: failures are logged, never block the write.
+ */
+export async function syncProductDocument(productId: string) {
+  try {
+    const index = getMeiliClient().index<ProductSearchDocument>(PRODUCTS_INDEX);
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: productIndexInclude,
+    });
+
+    if (!product || !product.isActive) {
+      await index.deleteDocuments([productId]).waitTask();
+      return;
+    }
+    await index.addDocuments([buildProductDocument(product)]).waitTask();
+  } catch (error) {
+    console.error(`[search] failed to sync product ${productId}:`, error);
+  }
+}
+
 /**
  * Full reindex: applies index settings, upserts every active product and
  * removes inactive/deleted ones. Idempotent — safe to run repeatedly.

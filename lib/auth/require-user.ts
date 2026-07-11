@@ -13,3 +13,12 @@ export async function requireUser() {
   }
   return { id: session.user.id, email: session.user.email ?? "", role: session.user.role };
 }
+
+/** Route-handler guard for admin endpoints: 401 anonymous, 403 non-admin. */
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== "ADMIN") {
+    throw new ApiError("FORBIDDEN", "Requiere rol de administrador.", 403);
+  }
+  return user;
+}

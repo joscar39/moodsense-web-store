@@ -18,6 +18,16 @@ type ApiErrorBody = {
   error: { code: string; message: string; details?: unknown };
 };
 
+/** Duck-typed to avoid importing the Prisma client into this module. */
+function isPrismaUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "P2002"
+  );
+}
+
 /**
  * Central error mapper for all route handlers: ZodError → 400, ApiError → its
  * status, malformed JSON → 400, anything else → opaque 500 (internals are
@@ -47,6 +57,19 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorBody> {
         },
       },
       { status: error.status }
+    );
+  }
+
+  // Prisma unique-constraint violation (P2002), e.g. duplicated slug or SKU.
+  if (isPrismaUniqueViolation(error)) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "CONFLICT",
+          message: "Ya existe un registro con ese valor único (slug o SKU).",
+        },
+      },
+      { status: 409 }
     );
   }
 
