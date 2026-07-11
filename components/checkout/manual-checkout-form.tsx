@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { cartSubtotalCents } from "@/lib/cart/cart-logic";
 import { useCartStore } from "@/lib/cart/cart-store";
 import { formatPrice } from "@/lib/format/price";
-import { manualCheckoutSchema } from "@/lib/validators/checkout";
+import { manualCheckoutFormSchema } from "@/lib/validators/checkout";
 
 import type { ManualCheckoutFormValues } from "@/lib/validators/checkout";
 
@@ -32,9 +32,8 @@ export function ManualCheckoutForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ManualCheckoutFormValues>({
-    resolver: zodResolver(manualCheckoutSchema),
+    resolver: zodResolver(manualCheckoutFormSchema),
     defaultValues: {
-      items: [],
       customer: { name: "", phone: "", email: "" },
       shipping: { line1: "", city: "", country: "DO" },
     },

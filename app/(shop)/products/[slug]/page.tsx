@@ -46,9 +46,17 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   // notFound() must NOT be thrown from generateMetadata: it downgrades the
   // response to a soft 404 (200). The page component throws it instead.
   if (!product) return { title: "Producto no encontrado" };
+  const image = product.images[0];
   return {
     title: `${product.name} · ${product.brand.name}`,
     description: product.description.slice(0, 160),
+    alternates: { canonical: `/products/${product.slug}` },
+    openGraph: {
+      type: "website",
+      title: `${product.name} · ${product.brand.name}`,
+      description: product.description.slice(0, 160),
+      ...(image && { images: [{ url: image.url, alt: image.alt }] }),
+    },
   };
 }
 
@@ -65,8 +73,31 @@ export default async function ProductPage({ params }: { params: Params }) {
     .slice(0, 4)
     .map((item) => ({ ...item, brandName: item.brand.name }));
 
+  const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0);
+  // Datos estructurados schema.org/Product para rich results de Google.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    sku: product.variants[0]?.sku,
+    image: product.images.map((img) => img.url),
+    brand: { "@type": "Brand", name: product.brand.name },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "USD",
+      price: (product.priceCents / 100).toFixed(2),
+      availability: totalStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/products/${product.slug}`,
+    },
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb className="mb-8">
         <BreadcrumbList>
           <BreadcrumbItem>

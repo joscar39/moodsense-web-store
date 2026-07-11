@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -28,12 +28,27 @@ const mono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
     default: "Mood Sense — Wear your vibe. Make the match.",
     template: "%s · Mood Sense",
   },
   description:
     "Curated multi-brand concept store. Head-to-toe style: premium streetwear, modern casual and accessible luxury for men and women.",
+  openGraph: {
+    type: "website",
+    siteName: "Mood Sense",
+    locale: "es",
+    // La imagen OG (1200×630) se añadirá como app/opengraph-image.png cuando
+    // el diseñador la entregue (ver docs/brand-assets-spec.md §3).
+  },
+  twitter: { card: "summary_large_image" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#F5F3EF",
 };
 
 export default function RootLayout({

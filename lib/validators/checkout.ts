@@ -66,4 +66,11 @@ export const manualCheckoutSchema = checkoutSchema.extend({
 });
 
 export type ManualCheckoutInput = z.infer<typeof manualCheckoutSchema>;
-export type ManualCheckoutFormValues = z.input<typeof manualCheckoutSchema>;
+
+/**
+ * Schema del FORMULARIO (sin `items`): el carrito no vive en react-hook-form
+ * — se fusiona al enviar. Validar `items` en el cliente haría fallar siempre
+ * el submit con "carrito vacío".
+ */
+export const manualCheckoutFormSchema = manualCheckoutSchema.omit({ items: true });
+export type ManualCheckoutFormValues = z.input<typeof manualCheckoutFormSchema>;

@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon, Trash2Icon, UploadIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -53,6 +54,8 @@ export function ProductForm({
   categories: SelectOption[];
 }) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -189,23 +192,64 @@ export function ProductForm({
       <Separator />
 
       <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-xs tracking-[0.25em] uppercase">Imágenes (URLs)</h3>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="rounded-none"
-            onClick={() => imagesArray.append({ url: "", alt: "" })}
-            disabled={imagesArray.fields.length >= 6}
-          >
-            <PlusIcon className="mr-1 size-4" /> Imagen
-          </Button>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-xs tracking-[0.25em] uppercase">Imágenes</h3>
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              className="hidden"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (!file) return;
+                setUploading(true);
+                try {
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  const response = await fetch("/api/admin/uploads", {
+                    method: "POST",
+                    body: formData,
+                  });
+                  if (!response.ok) {
+                    toast.error((await readError(response)) ?? "No se pudo subir la imagen.");
+                    return;
+                  }
+                  const body = (await response.json()) as { data: { url: string } };
+                  imagesArray.append({ url: body.data.url, alt: "" });
+                  toast.success("Imagen subida. Completa el texto alternativo.");
+                } finally {
+                  setUploading(false);
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-none"
+              disabled={uploading || imagesArray.fields.length >= 6}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadIcon className="mr-1 size-4" /> {uploading ? "Subiendo…" : "Subir archivo"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-none"
+              onClick={() => imagesArray.append({ url: "", alt: "" })}
+              disabled={imagesArray.fields.length >= 6}
+            >
+              <PlusIcon className="mr-1 size-4" /> URL
+            </Button>
+          </div>
         </div>
         {imagesArray.fields.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            Sin imágenes. Se mostrará un placeholder en la tienda. (Subida a Vercel Blob: pendiente
-            para el deploy, Fase 7.)
+            Sin imágenes. Se mostrará un placeholder en la tienda. Sube un archivo (requiere Vercel
+            Blob configurado) o pega una URL.
           </p>
         )}
         <div className="space-y-3">
