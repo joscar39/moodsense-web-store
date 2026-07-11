@@ -1,6 +1,8 @@
+import { UserIcon } from "lucide-react";
 import Link from "next/link";
 
 import { CartButton } from "@/components/cart/cart-button";
+import { Button } from "@/components/ui/button";
 
 import { MobileNav } from "./mobile-nav";
 import { SearchForm } from "./search-form";
@@ -37,6 +39,14 @@ export function SiteHeader({ navLinks }: { navLinks: NavLink[] }) {
           <div className="hidden sm:block">
             <SearchForm />
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Mi cuenta"
+            render={<Link href="/account" />}
+          >
+            <UserIcon className="size-5" />
+          </Button>
           <CartButton />
         </div>
       </div>

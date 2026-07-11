@@ -25,8 +25,12 @@ export const authConfig = {
     },
     authorized({ auth, request }) {
       // Server-side gate for protected routes (see middleware.ts matcher).
-      if (request.nextUrl.pathname.startsWith("/admin")) {
+      const { pathname } = request.nextUrl;
+      if (pathname.startsWith("/admin")) {
         return auth?.user?.role === "ADMIN";
+      }
+      if (pathname.startsWith("/account")) {
+        return Boolean(auth?.user);
       }
       return true;
     },

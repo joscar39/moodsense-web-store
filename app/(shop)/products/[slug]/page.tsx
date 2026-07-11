@@ -5,6 +5,7 @@ import { ProductGrid } from "@/components/catalog/product-grid";
 import { SectionHeading } from "@/components/home/section-heading";
 import { ProductGallery } from "@/components/pdp/product-gallery";
 import { VariantSelector } from "@/components/pdp/variant-selector";
+import { WishlistButton } from "@/components/pdp/wishlist-button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -101,11 +102,16 @@ export default async function ProductPage({ params }: { params: Params }) {
         />
 
         <div className="space-y-6">
-          <div>
-            <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase">
-              {product.brand.name}
-            </p>
-            <h1 className="mt-2 font-serif text-4xl tracking-tight sm:text-5xl">{product.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase">
+                {product.brand.name}
+              </p>
+              <h1 className="mt-2 font-serif text-4xl tracking-tight sm:text-5xl">
+                {product.name}
+              </h1>
+            </div>
+            <WishlistButton productId={product.id} slug={product.slug} />
           </div>
 
           <VariantSelector

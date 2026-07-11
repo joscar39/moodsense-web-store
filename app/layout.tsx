@@ -1,23 +1,30 @@
 import type { Metadata } from "next";
-import { Archivo, Geist_Mono, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-const sans = Archivo({
+// Self-hosted variable fonts (app/fonts/, latin subset): no build-time
+// network dependency on Google Fonts (builds hang/fail behind VPNs/firewalls).
+const sans = localFont({
+  src: "./fonts/archivo-variable.woff2",
+  weight: "100 900",
   variable: "--font-sans",
-  subsets: ["latin"],
 });
 
-const serif = Playfair_Display({
+const serif = localFont({
+  src: [
+    { path: "./fonts/playfair-variable.woff2", weight: "400 900", style: "normal" },
+    { path: "./fonts/playfair-italic-variable.woff2", weight: "400 900", style: "italic" },
+  ],
   variable: "--font-serif",
-  subsets: ["latin"],
 });
 
-const mono = Geist_Mono({
+const mono = localFont({
+  src: "./fonts/geist-mono-variable.woff2",
+  weight: "100 900",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
