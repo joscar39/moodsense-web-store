@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mood Sense — Brief de diseño</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 22mm 18mm;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: Georgia, "Times New Roman", serif;
+        color: #111111;
+        background: #ffffff;
+        font-size: 11.5pt;
+        line-height: 1.55;
+      }
+      .sans {
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+      header.cover {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 48px 40px;
+        margin-bottom: 36px;
+      }
+      header.cover .eyebrow {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 9pt;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #c9a876;
+        margin-bottom: 14px;
+      }
+      header.cover h1 {
+        font-size: 30pt;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+      }
+      header.cover h1 em {
+        color: #c9a876;
+      }
+      header.cover p.sub {
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin-top: 14px;
+        font-size: 10.5pt;
+        color: rgba(245, 243, 239, 0.85);
+        max-width: 34em;
+      }
+      main {
+        padding: 0 8px;
+      }
+      h2 {
+        font-size: 17pt;
+        font-weight: 500;
+        margin: 34px 0 6px;
+        padding-top: 10px;
+        border-top: 2px solid #111111;
+      }
+      h2 .num {
+        color: #c9a876;
+        margin-right: 10px;
+      }
+      .intro {
+        background: #f5f3ef;
+        padding: 18px 22px;
+        margin: 18px 0 6px;
+        font-size: 10.5pt;
+      }
+      .piece {
+        border: 1px solid #d9d5cc;
+        padding: 16px 20px;
+        margin: 14px 0;
+        page-break-inside: avoid;
+      }
+      .piece h3 {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11pt;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .piece p {
+        margin: 6px 0;
+      }
+      .meta {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 9.5pt;
+        background: #f5f3ef;
+        padding: 10px 14px;
+        margin-top: 10px;
+      }
+      .meta b {
+        color: #0b1a33;
+      }
+      .swatches {
+        display: flex;
+        gap: 10px;
+        margin: 14px 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 8.5pt;
+      }
+      .sw {
+        flex: 1;
+        border: 1px solid #d9d5cc;
+      }
+      .sw .color {
+        height: 54px;
+      }
+      .sw .label {
+        padding: 6px 8px;
+      }
+      ul {
+        margin: 6px 0 6px 20px;
+      }
+      footer {
+        margin-top: 40px;
+        padding-top: 12px;
+        border-top: 1px solid #d9d5cc;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 8.5pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <div class="eyebrow">Brief de diseño · Assets visuales</div>
+      <h1>Mood <em>Sense</em></h1>
+      <p class="sub">
+        Tienda online de moda urbana multimarca — ropa, calzado, gorras y accesorios de streetwear
+        premium y casual moderno, para hombre y mujer de 18 a 35 años. Slogan:
+        <strong>"Wear your vibe. Make the match."</strong>
+      </p>
+    </header>
+
+    <main>
+      <div class="intro sans">
+        <strong>Qué necesitamos de ti.</strong> Este documento lista todas las piezas gráficas que
+        la tienda necesita, qué es cada una, dónde la verá el cliente y en qué medidas y formatos
+        entregarla. La estética de la marca es editorial y minimalista: mucho espacio en blanco,
+        tipografía serif elegante para titulares, detalles dorados usados con moderación. Piensa en
+        una revista de moda, no en una tienda ruidosa.
+      </div>
+
+      <h2><span class="num">—</span>Paleta de la marca</h2>
+      <p>
+        Estos cuatro colores ya están definidos y son la base de todo el sitio. Los assets deben
+        convivir con ellos:
+      </p>
+      <div class="swatches">
+        <div class="sw">
+          <div class="color" style="background: #f5f3ef"></div>
+          <div class="label"><b>Crudo</b> #F5F3EF<br />fondo principal</div>
+        </div>
+        <div class="sw">
+          <div class="color" style="background: #111111"></div>
+          <div class="label" style="color: #111"><b>Tinta</b> #111111<br />texto y detalles</div>
+        </div>
+        <div class="sw">
+          <div class="color" style="background: #0b1a33"></div>
+          <div class="label"><b>Azul noche</b> #0B1A33<br />secciones premium</div>
+        </div>
+        <div class="sw">
+          <div class="color" style="background: #c9a876"></div>
+          <div class="label"><b>Dorado</b> #C9A876<br />acentos de lujo</div>
+        </div>
+      </div>
+
+      <h2><span class="num">01</span>Logotipo</h2>
+
+      <div class="piece">
+        <h3>Logotipo principal (horizontal)</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> la firma de la marca. Aparece en la parte superior
+          de cada página (el encabezado que acompaña al cliente mientras navega), en el pie de
+          página, en el menú del celular y en las pantallas de iniciar sesión. Es lo primero y lo
+          último que ve el cliente en cada visita.
+        </p>
+        <p>
+          <strong>Qué necesitamos:</strong> una composición horizontal que se lea bien tanto en un
+          espacio ancho (computador) como en uno angosto (celular). Hoy usamos una tipografía serif
+          con la palabra "Sense" en itálica como referencia del carácter buscado.
+        </p>
+        <ul>
+          <li>
+            <strong>Versión para fondo claro</strong> (sobre el crudo #F5F3EF): logo en tinta
+            #111111.
+          </li>
+          <li>
+            <strong>Versión para fondo oscuro</strong> (sobre el azul noche #0B1A33): logo en crudo
+            o dorado.
+          </li>
+        </ul>
+        <div class="meta">
+          <b>Formato:</b> vectorial (SVG, con curvas trazadas) + PDF maestro.
+          <b>Proporción:</b> pensado para verse nítido a solo 32–44 píxeles de alto.
+          <b>Variantes:</b> fondo claro y fondo oscuro.
+        </div>
+      </div>
+
+      <h2><span class="num">02</span>Íconos</h2>
+
+      <div class="piece">
+        <h3>Ícono de pestaña del navegador y de pantalla de inicio (favicon)</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> el ícono pequeñito que aparece en la pestaña del
+          navegador junto al nombre del sitio, y el que se usa cuando alguien guarda la tienda en la
+          pantalla de inicio de su celular como si fuera una app.
+        </p>
+        <p>
+          <strong>Qué necesitamos:</strong> una versión <em>simplificada</em> del logotipo (un
+          monograma o símbolo — el logotipo completo no se distingue a ese tamaño). Debe reconocerse
+          con claridad incluso a 16×16 píxeles.
+        </p>
+        <div class="meta">
+          <b>Formatos y tamaños exactos:</b> versión vectorial (SVG) + PNG en 16×16, 32×32, 48×48,
+          180×180 (para iPhone/iPad, con fondo sólido, sin transparencia), 192×192 y 512×512 (para
+          Android). <b>Variantes:</b> una sola, debe funcionar sobre cualquier fondo.
+        </div>
+      </div>
+
+      <h2><span class="num">03</span>Banners</h2>
+
+      <div class="piece">
+        <h3>Banner principal de la página de inicio</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> la imagen grande de bienvenida que ocupa la parte
+          superior de la tienda al entrar. Sobre ella se superpone, centrado, el slogan de la marca
+          en letras grandes.
+        </p>
+        <p>
+          <strong>Qué necesitamos:</strong> una imagen de campaña (fotografía de estilo editorial:
+          outfit completo, actitud urbana) con la <em>zona central despejada</em> — sin elementos
+          muy cargados donde irá el texto. Si la imagen es clara, el texto irá en tinta; si tiene
+          zonas oscuras, considera un velo sutil que garantice la lectura.
+        </p>
+        <div class="meta">
+          <b>Dimensiones:</b> versión computador (panorámica) <b>2880×1200 px</b> · versión celular
+          (vertical) <b>1080×1350 px</b>. <b>Formato:</b> JPG de alta calidad o WebP.
+          <b>Variantes:</b> las dos orientaciones; misma dirección de arte.
+        </div>
+      </div>
+
+      <div class="piece">
+        <h3>Imágenes de categoría (4 piezas)</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> en la página de inicio hay cuatro tarjetas que
+          invitan a explorar cada mundo de la tienda:
+          <strong>Ropa, Calzado, Gorras y Accesorios</strong>. Hoy son tarjetas tipográficas;
+          queremos vestirlas con una foto representativa de cada categoría.
+        </p>
+        <p>
+          <strong>Qué necesitamos:</strong> 4 fotografías con estilo consistente entre sí, con
+          espacio visual para que el nombre de la categoría se lea encima.
+        </p>
+        <div class="meta">
+          <b>Dimensiones:</b> <b>800×600 px</b> (proporción 4:3) cada una. <b>Formato:</b> JPG/WebP.
+          <b>Variantes:</b> ninguna adicional.
+        </div>
+      </div>
+
+      <div class="piece">
+        <h3>Fondo de la sección "boutique" (opcional)</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> a mitad de la página de inicio hay una franja
+          premium en azul noche con detalles dorados, que destaca la selección curada de la
+          temporada. Puede llevar una imagen de fondo oscura y atmosférica detrás del texto dorado.
+        </p>
+        <div class="meta">
+          <b>Dimensiones:</b> <b>2880×900 px</b> (computador) y <b>1080×1080 px</b> (celular).
+          <b>Formato:</b> JPG/WebP con tratamiento oscuro. <b>Variantes:</b> las dos orientaciones.
+        </div>
+      </div>
+
+      <h2><span class="num">04</span>Imágenes de producto</h2>
+
+      <div class="piece">
+        <h3>Plantilla / lineamiento de fotografía de producto</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> todas las fotos de producto de la tienda — en las
+          cuadrículas del catálogo, en la página de detalle de cada producto (foto grande +
+          miniaturas) y en el carrito. Todo el sistema visual usa el mismo encuadre
+          <strong>vertical 3:4</strong>.
+        </p>
+        <p>
+          <strong>Qué necesitamos:</strong> definir el estándar fotográfico: fondo neutro
+          consistente (idealmente el crudo #F5F3EF de la marca), iluminación pareja, mínimo dos
+          tomas por producto (frontal + detalle o espalda).
+        </p>
+        <div class="meta">
+          <b>Dimensiones:</b> archivos maestros de <b>1600×2133 px</b> (proporción 3:4 exacta; nunca
+          menos de 1200×1600). <b>Formato:</b> JPG calidad alta o WebP. <b>Variantes:</b> ninguna —
+          misma foto sirve en claro y oscuro.
+        </div>
+      </div>
+
+      <h2><span class="num">05</span>Redes sociales</h2>
+
+      <div class="piece">
+        <h3>Imagen para compartir enlaces (redes y WhatsApp)</h3>
+        <p>
+          <strong>Qué es y dónde se ve:</strong> cuando alguien comparte el enlace de la tienda por
+          WhatsApp, Instagram, Facebook o X, la vista previa muestra una imagen. Esta pieza
+          representa a la marca en ese primer vistazo.
+        </p>
+        <p>
+          <strong>Qué necesitamos:</strong> una composición con el logotipo y el slogan, sobre la
+          paleta de la marca. Los elementos importantes deben estar centrados, alejados de los
+          bordes (las apps recortan los costados).
+        </p>
+        <div class="meta">
+          <b>Dimensiones:</b> <b>1200×630 px</b>, peso máximo 1 MB. <b>Formato:</b> PNG o JPG.
+          <b>Variantes:</b> una sola.
+        </div>
+      </div>
+
+      <h2><span class="num">—</span>Entrega</h2>
+      <p class="sans" style="font-size: 10.5pt">
+        Todo lo vectorial en SVG con textos convertidos a curvas (+ archivo editable). Todo lo
+        fotográfico en su tamaño maestro indicado — nosotros generamos las reducciones. Nombres de
+        archivo descriptivos y en minúsculas (ej. <em>logo-fondo-claro.svg</em>,
+        <em>banner-inicio-celular.jpg</em>). Ante cualquier duda de contexto, la referencia de tono
+        es: revista de moda editorial, urbana y contemporánea.
+      </p>
+
+      <footer>
+        <span>Mood Sense · Brief de assets visuales</span>
+        <span>Wear your vibe. Make the match.</span>
+      </footer>
+    </main>
+  </body>
+</html>

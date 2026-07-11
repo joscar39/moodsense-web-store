@@ -3,6 +3,7 @@
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -19,7 +20,11 @@ type CheckoutIssue = {
   availableStock?: number;
 };
 
+// "whatsapp" (pedido manual) por defecto; "stripe" reactiva el checkout hosted.
+const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE ?? "whatsapp";
+
 export function CartView() {
+  const router = useRouter();
   const { items, setQuantity, removeItem } = useCartStore();
   const [mounted, setMounted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -47,6 +52,11 @@ export function CartView() {
   const subtotal = cartSubtotalCents(items);
 
   const startCheckout = async () => {
+    // Flujo manual (WhatsApp): los datos se piden en /checkout.
+    if (CHECKOUT_MODE !== "stripe") {
+      router.push("/checkout");
+      return;
+    }
     setSubmitting(true);
     try {
       const response = await fetch("/api/checkout", {
@@ -183,10 +193,16 @@ export function CartView() {
           disabled={submitting}
           onClick={startCheckout}
         >
-          {submitting ? "Redirigiendo…" : "Finalizar compra"}
+          {submitting
+            ? "Redirigiendo…"
+            : CHECKOUT_MODE === "stripe"
+              ? "Finalizar compra"
+              : "Realizar pedido"}
         </Button>
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          Pago seguro procesado por Stripe.
+          {CHECKOUT_MODE === "stripe"
+            ? "Pago seguro procesado por Stripe."
+            : "Coordinamos el pago por WhatsApp al confirmar tu pedido."}
         </p>
       </aside>
     </div>

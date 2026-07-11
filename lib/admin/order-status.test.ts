@@ -14,13 +14,25 @@ describe("canTransition", () => {
     expect(canTransition("DELIVERED", "REFUNDED")).toBe(true);
   });
 
-  it("never allows setting PAID manually", () => {
+  it("never allows setting PAID manually on Stripe orders", () => {
     expect(canTransition("PENDING", "PAID")).toBe(false);
     expect(canTransition("CANCELLED", "PAID")).toBe(false);
   });
 
-  it("treats CANCELLED and REFUNDED as terminal", () => {
+  it("allows confirming or cancelling a WhatsApp order awaiting payment", () => {
+    expect(canTransition("PENDING_PAYMENT", "PAID")).toBe(true);
+    expect(canTransition("PENDING_PAYMENT", "CANCELLED")).toBe(true);
+    expect(canTransition("PENDING_PAYMENT", "SHIPPED")).toBe(false);
+  });
+
+  it("never allows expiring manually (only the sweeper does)", () => {
+    expect(canTransition("PENDING_PAYMENT", "EXPIRED")).toBe(false);
+    expect(canTransition("PENDING", "EXPIRED")).toBe(false);
+  });
+
+  it("treats CANCELLED, EXPIRED and REFUNDED as terminal", () => {
     expect(canTransition("CANCELLED", "SHIPPED")).toBe(false);
+    expect(canTransition("EXPIRED", "PAID")).toBe(false);
     expect(canTransition("REFUNDED", "PAID")).toBe(false);
     expect(canTransition("REFUNDED", "DELIVERED")).toBe(false);
   });

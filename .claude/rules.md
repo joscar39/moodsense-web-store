@@ -22,6 +22,8 @@
 - **Manejo de errores centralizado**: `handleApiError` reutilizable en todos los route handlers (mapea ZodError→400, auth→401/403, not found→404, resto→500 sin filtrar detalles internos); error boundaries (`error.tsx`) en el frontend.
 - Respuestas de API con forma consistente: `{ data }` en éxito, `{ error: { code, message } }` en fallo.
 - **Dinero en centavos enteros** en DB, servicios y APIs (`priceCents`, `totalCents`…). Nunca floats ni decimales; formatear a moneda solo en la capa de presentación.
+- **Todo cambio de stock pasa por `lib/inventory/stock.ts`** (`reserveStock`, `restoreStock`, `decrementStockBestEffort`) dentro de una transacción — nunca modificar `ProductVariant.stock` directamente desde otro lado del código. La reserva usa UPDATE condicional (`stock >= qty`) para garantizar atomicidad bajo concurrencia; saltarse el servicio rompe esa garantía. (Excepción: el admin edita stock vía el CRUD de productos, que es reposición manual, no flujo de venta.)
+- **Notificaciones externas (WhatsApp, email futuro) detrás de una interfaz** en `lib/notifications/`; los servicios de negocio no conocen al proveedor concreto. El envío post-commit nunca bloquea ni revierte la operación de negocio (fallo → log).
 - Imágenes siempre con `next/image`. Listados con streaming/Suspense. Catálogo con ISR.
 
 ## Seguridad

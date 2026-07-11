@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { listAdminOrders } from "@/lib/admin/orders";
+import { expireStaleManualOrders } from "@/lib/checkout/expire-orders";
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
 import { firstSearchParamValues } from "@/lib/api/search-params";
 import { formatPrice } from "@/lib/format/price";
@@ -15,11 +16,13 @@ const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "medium", timeS
 
 const FILTERS: { value: OrderStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "Todos" },
-  { value: "PENDING", label: "Pendientes" },
+  { value: "PENDING_PAYMENT", label: "Pago pendiente" },
   { value: "PAID", label: "Pagados" },
   { value: "SHIPPED", label: "Enviados" },
   { value: "DELIVERED", label: "Entregados" },
+  { value: "PENDING", label: "Pendientes (Stripe)" },
   { value: "CANCELLED", label: "Cancelados" },
+  { value: "EXPIRED", label: "Expirados" },
   { value: "REFUNDED", label: "Reembolsados" },
 ];
 
@@ -27,6 +30,8 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdminPage();
+  // Barrido oportunista: expira PENDING_PAYMENT vencidos y libera su stock.
+  await expireStaleManualOrders();
   const raw = firstSearchParamValues(await searchParams);
   const statusFilter = Object.values(OrderStatus).includes(raw.status as OrderStatus)
     ? (raw.status as OrderStatus)

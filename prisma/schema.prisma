@@ -211,11 +211,17 @@ model Address {
 }
 
 enum OrderStatus {
+  // Stripe flow: created, awaiting hosted checkout (stock NOT reserved).
   PENDING
+  // WhatsApp/manual flow: created with stock RESERVED, awaiting manual
+  // payment confirmation by the operator.
+  PENDING_PAYMENT
   PAID
   SHIPPED
   DELIVERED
   CANCELLED
+  // PENDING_PAYMENT that ran out of time; stock restored automatically.
+  EXPIRED
   REFUNDED
 }
 

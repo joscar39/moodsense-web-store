@@ -26,7 +26,7 @@ export async function getDashboardMetrics(now = new Date()) {
       _sum: { totalCents: true },
       _count: true,
     }),
-    prisma.order.count({ where: { status: "PENDING" } }),
+    prisma.order.count({ where: { status: { in: ["PENDING", "PENDING_PAYMENT"] } } }),
     prisma.productVariant.findMany({
       where: { stock: { lte: LOW_STOCK_THRESHOLD }, product: { isActive: true } },
       orderBy: { stock: "asc" },

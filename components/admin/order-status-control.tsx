@@ -11,10 +11,12 @@ import type { OrderStatus } from "@/lib/generated/prisma/enums";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: "Pendiente",
+  PENDING_PAYMENT: "Pago pendiente",
   PAID: "Pagado",
   SHIPPED: "Enviado",
   DELIVERED: "Entregado",
   CANCELLED: "Cancelado",
+  EXPIRED: "Expirado",
   REFUNDED: "Reembolsado",
 };
 

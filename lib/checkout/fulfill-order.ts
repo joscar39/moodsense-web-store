@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { decrementStockBestEffort, stockLinesFromOrderItems } from "@/lib/inventory/stock";
 
 import type Stripe from "stripe";
 
@@ -42,19 +43,8 @@ export async function markOrderPaid(session: Stripe.Checkout.Session) {
       },
     });
 
-    for (const item of order.items) {
-      if (!item.variantId) continue;
-      const updated = await tx.productVariant.updateMany({
-        where: { id: item.variantId, stock: { gte: item.quantity } },
-        data: { stock: { decrement: item.quantity } },
-      });
-      if (updated.count === 0) {
-        // Payment already happened; never block fulfillment. Flag for review.
-        console.error(
-          `[stripe] stock underflow for variant ${item.variantId} on order ${order.id} — needs manual review`
-        );
-      }
-    }
+    // Payment already happened; never block fulfillment (underflow is logged).
+    await decrementStockBestEffort(tx, stockLinesFromOrderItems(order.items), order.id);
   });
 
   return { status: "fulfilled" as const };

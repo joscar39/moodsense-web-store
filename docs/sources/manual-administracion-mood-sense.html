@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mood Sense — Manual de administración</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 20mm 18mm;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 10.5pt;
+        line-height: 1.55;
+      }
+      header.cover {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 42px 40px;
+        margin-bottom: 30px;
+      }
+      header.cover .eyebrow {
+        font-size: 9pt;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #c9a876;
+        margin-bottom: 12px;
+      }
+      header.cover h1 {
+        font-family: Georgia, serif;
+        font-size: 26pt;
+        font-weight: 500;
+      }
+      header.cover p {
+        margin-top: 10px;
+        color: rgba(245, 243, 239, 0.85);
+        max-width: 36em;
+      }
+      h2 {
+        font-family: Georgia, serif;
+        font-size: 16pt;
+        font-weight: 500;
+        margin: 30px 0 10px;
+        padding: 8px 0 6px;
+        border-bottom: 2px solid #0b1a33;
+        page-break-after: avoid;
+      }
+      h2 .num {
+        color: #c9a876;
+        margin-right: 8px;
+      }
+      h3 {
+        font-size: 11pt;
+        margin: 16px 0 6px;
+        color: #0b1a33;
+        page-break-after: avoid;
+      }
+      p {
+        margin: 6px 0;
+      }
+      ol,
+      ul {
+        margin: 6px 0 10px 22px;
+      }
+      li {
+        margin: 3px 0;
+      }
+      .tip {
+        background: #f5f3ef;
+        border-left: 4px solid #c9a876;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .warn {
+        background: #fdf2f2;
+        border-left: 4px solid #c0392b;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .path {
+        background: #eef1f6;
+        border: 1px solid #d5dae5;
+        border-radius: 3px;
+        padding: 1px 6px;
+        font-family: Consolas, monospace;
+        font-size: 9pt;
+        white-space: nowrap;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        font-size: 9.5pt;
+      }
+      th,
+      td {
+        border: 1px solid #d5dae5;
+        padding: 6px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f5f3ef;
+      }
+      .faq dt {
+        font-weight: 600;
+        margin-top: 12px;
+        color: #0b1a33;
+      }
+      .faq dd {
+        margin: 4px 0 0 0;
+      }
+      footer {
+        margin-top: 36px;
+        padding-top: 10px;
+        border-top: 1px solid #d5dae5;
+        font-size: 8.5pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <div class="eyebrow">Manual de administración</div>
+      <h1>Mood Sense — Guía del operador de la tienda</h1>
+      <p>
+        Todo lo que necesitas para el día a día: entrar al panel, cargar productos, controlar
+        inventario y gestionar los pedidos que llegan por WhatsApp. Sin tecnicismos.
+      </p>
+    </header>
+
+    <h2><span class="num">1</span>Entrar al panel de administración</h2>
+    <ol>
+      <li>
+        Abre <span class="path">tu-tienda.com/admin</span> en el navegador (en pruebas locales:
+        <span class="path">localhost:3000/admin</span>).
+      </li>
+      <li>
+        Si no has iniciado sesión, el sitio te llevará a la pantalla de acceso. Usa tu
+        <strong>email y contraseña de administrador</strong>.
+      </li>
+      <li>
+        Al entrar verás tres secciones en el menú lateral: <strong>Dashboard</strong>,
+        <strong>Productos</strong> y <strong>Pedidos</strong>.
+      </li>
+    </ol>
+    <h3>Sobre los roles de usuario</h3>
+    <p>
+      Hay dos tipos de cuenta: <strong>ADMIN</strong> (tú — ve el panel y gestiona todo) y
+      <strong>USER</strong> (clientes — solo compran y ven su propia cuenta). Cualquiera que se
+      registre en la tienda es cliente automáticamente. Un cliente <em>no puede</em> volverse
+      administrador desde la web:
+      <strong>convertir una cuenta en administrador lo hace el desarrollador</strong> directamente
+      en la base de datos, a pedido tuyo. Es una medida de seguridad deliberada.
+    </p>
+    <div class="tip">
+      <strong>Consejo:</strong> usa una contraseña fuerte y no compartas la cuenta admin. Si alguien
+      más va a operar la tienda, pide al desarrollador que le cree su propia cuenta de administrador
+      — así cada acción queda asociada a una persona.
+    </div>
+
+    <h2><span class="num">2</span>El Dashboard: tu foto del negocio</h2>
+    <p>Al entrar a <span class="path">/admin</span> ves de un vistazo:</p>
+    <ul>
+      <li>
+        <strong>Ventas:</strong> ingresos totales, número de pedidos cobrados, ticket promedio, y lo
+        mismo para los últimos 30 días.
+      </li>
+      <li>
+        <strong>Pedidos pendientes:</strong> cuántos esperan confirmación de pago — tu lista de
+        tareas del día.
+      </li>
+      <li>
+        <strong>Últimos pedidos:</strong> los 5 más recientes con su estado (clic para abrir el
+        detalle).
+      </li>
+      <li><strong>Top productos:</strong> lo más vendido por unidades.</li>
+      <li>
+        <strong>Stock bajo:</strong> variantes con 3 unidades o menos.
+        <strong>Revisa esta lista a diario</strong> — es tu alerta de reposición.
+      </li>
+    </ul>
+
+    <h2><span class="num">3</span>Cargar un producto nuevo</h2>
+    <ol>
+      <li>Ve a <strong>Productos</strong> y pulsa <strong>"Nuevo producto"</strong>.</li>
+      <li>Completa el formulario campo por campo:</li>
+    </ol>
+    <table>
+      <tr>
+        <th>Campo</th>
+        <th>Qué poner</th>
+      </tr>
+      <tr>
+        <td><strong>Nombre</strong></td>
+        <td>El nombre comercial, ej. "Cloud Heavy Hoodie". Es lo que ve el cliente.</td>
+      </tr>
+      <tr>
+        <td><strong>Slug</strong></td>
+        <td>
+          La parte final de la dirección web del producto (ej. <em>cloud-heavy-hoodie</em>). Se
+          genera solo a partir del nombre — normalmente no lo toques. Solo minúsculas y guiones, sin
+          espacios; no puede repetirse entre productos.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Descripción</strong></td>
+        <td>2–4 frases vendedoras: material, corte, para qué ocasión.</td>
+      </tr>
+      <tr>
+        <td><strong>Marca / Categoría</strong></td>
+        <td>Elige de las listas. Definen dónde aparece el producto y sus filtros.</td>
+      </tr>
+      <tr>
+        <td><strong>Género</strong></td>
+        <td>Hombre, Mujer o Unisex — habilita el filtro de género del catálogo.</td>
+      </tr>
+      <tr>
+        <td><strong>Precio (USD)</strong></td>
+        <td>Precio de venta en dólares, con decimales si aplica (ej. 39.99).</td>
+      </tr>
+      <tr>
+        <td><strong>Precio de comparación</strong></td>
+        <td>
+          Solo para ofertas: el precio "anterior" tachado. Debe ser mayor que el precio actual; la
+          tienda calcula y muestra el % de descuento automáticamente. Déjalo vacío si no hay oferta.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Activo</strong></td>
+        <td>
+          Marcado = visible en la tienda. Desmárcalo para ocultarlo sin borrarlo (borrador/pausa).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Destacado</strong></td>
+        <td>Marcado = aparece en "Destacados de la temporada" en la página de inicio.</td>
+      </tr>
+      <tr>
+        <td><strong>Imágenes</strong></td>
+        <td>
+          Direcciones web (URL) de las fotos, con su texto alternativo (describe la foto — importa
+          para accesibilidad y Google). La primera es la principal.
+          <em
+            >Por ahora las fotos se suben a un servicio externo y se pega aquí su URL; la subida
+            directa de archivos llegará con el despliegue final.</em
+          >
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Variantes</strong></td>
+        <td>
+          Una fila por combinación talla/color que vendas. <strong>SKU</strong>: código único del
+          ítem (ej. MS-ATL-021-M — invéntalo siguiendo el patrón marca-número-talla).
+          <strong>Talla</strong> y <strong>Color</strong>: opcionales (una gorra puede no tener
+          talla). <strong>$ opc.</strong>: solo si esa variante cuesta distinto del precio general.
+          <strong>Stock</strong>: unidades disponibles.
+        </td>
+      </tr>
+    </table>
+    <ol start="3">
+      <li>
+        Pulsa <strong>Guardar</strong>. El producto aparece de inmediato en el catálogo, la búsqueda
+        y la página de inicio (si es destacado).
+      </li>
+    </ol>
+
+    <h2><span class="num">4</span>Editar, ocultar o eliminar un producto</h2>
+    <ul>
+      <li>
+        <strong>Editar:</strong> en la tabla de Productos, clic en el nombre → cambias lo que
+        necesites → Guardar. Los cambios se publican al instante.
+      </li>
+      <li>
+        <strong>Ocultar temporalmente:</strong> edítalo y desmarca <strong>Activo</strong>.
+        Desaparece de la tienda y la búsqueda, pero conservas toda su información.
+      </li>
+      <li>
+        <strong>Eliminar:</strong> el ícono de papelera en la fila del producto (pide confirmación).
+        <strong>Es definitivo</strong>: se borra el producto y sus variantes. Los pedidos históricos
+        que lo incluían no se pierden — guardan su propia copia del nombre y precio. Si dudas, mejor
+        ocúltalo.
+      </li>
+    </ul>
+
+    <h2><span class="num">5</span>Gestionar el inventario</h2>
+    <ul>
+      <li>
+        <strong>Ver stock:</strong> la tabla de Productos muestra el stock total de cada producto;
+        para ver el detalle por talla/color, entra a editarlo — cada variante muestra sus unidades.
+        El Dashboard te avisa cuando algo baja de 3 unidades.
+      </li>
+      <li>
+        <strong>Reponer:</strong> edita el producto y escribe la nueva cantidad en el campo Stock de
+        la variante (si tenías 2 y llegaron 10, escribe 12). Guarda.
+      </li>
+      <li>
+        <strong>Marcar agotado a mano:</strong> pon el stock de la variante en 0 — el cliente verá
+        esa talla tachada y no podrá pedirla. Para retirar el producto entero de la tienda, desmarca
+        <strong>Activo</strong>.
+      </li>
+      <li>
+        <strong>Importante:</strong> el stock también se mueve solo: se <em>reserva</em> al entrar
+        un pedido, y se <em>devuelve</em> si cancelas el pedido o si expira sin pago (ver sección
+        6). No "corrijas" a mano esos movimientos.
+      </li>
+    </ul>
+
+    <h2><span class="num">6</span>Pedidos por WhatsApp: el flujo completo</h2>
+    <p>
+      La tienda funciona con confirmación manual de pago (mientras no haya pasarela de tarjetas
+      activa). Así fluye un pedido:
+    </p>
+    <ol>
+      <li>
+        <strong>El cliente hace su pedido en la web:</strong> llena su nombre, WhatsApp y dirección,
+        y confirma. En ese momento el pedido queda registrado como
+        <strong>"Pago pendiente"</strong> y sus unidades quedan <strong>reservadas</strong> (nadie
+        más puede comprarlas — imposible vender dos veces la última unidad).
+      </li>
+      <li>
+        <strong>Te llega un mensaje de WhatsApp</strong> al número del operador con todo el detalle:
+        productos, cantidades, total, nombre, teléfono y dirección del cliente. El cliente también
+        ve un botón para escribirte directamente.
+      </li>
+      <li>
+        <strong>Cobras por tu canal habitual</strong> (transferencia, efectivo contra entrega — lo
+        acuerdas con el cliente por WhatsApp).
+      </li>
+      <li>
+        <strong>Confirmas en el panel:</strong> Pedidos → filtro <strong>"Pago pendiente"</strong> →
+        abre el pedido → botón <strong>"→ Pagado"</strong>. Listo: el pedido pasa a la cola de
+        envío. (El stock no se toca aquí — ya estaba reservado desde el paso 1.)
+      </li>
+      <li>
+        <strong>Despachas:</strong> cuando envíes el paquete, marca <strong>"→ Enviado"</strong>, y
+        al confirmarse la entrega, <strong>"→ Entregado"</strong>.
+      </li>
+      <li>
+        <strong>Si el pago no llega:</strong> abre el pedido y pulsa
+        <strong>"→ Cancelado"</strong> — las unidades reservadas
+        <strong>vuelven al inventario automáticamente</strong>.
+      </li>
+      <li>
+        <strong>Expiración automática:</strong> si no haces nada, los pedidos sin pago se marcan
+        solos como <strong>"Expirado"</strong> pasadas 48 horas (plazo configurable) y su stock se
+        libera. No tienes que perseguirlos.
+      </li>
+    </ol>
+    <div class="tip">
+      <strong>Regla de oro:</strong> un pedido solo se marca "Pagado" cuando el dinero está
+      verificado en tu cuenta. El panel no te dejará saltarte pasos (por ejemplo, no puedes pasar un
+      pedido cancelado a pagado).
+    </div>
+    <div class="warn">
+      <strong>Nota sobre el mensaje de WhatsApp:</strong> mientras no esté conectada la API oficial
+      de WhatsApp (requiere una verificación de negocio con Meta que está en trámite), el aviso del
+      pedido queda registrado en el sistema con un enlace listo para abrir en WhatsApp. La
+      experiencia del cliente no cambia; cuando la API esté activa, el mensaje te llegará solo, sin
+      tocar nada más.
+    </div>
+
+    <h2><span class="num">7</span>Cupones de descuento</h2>
+    <p>
+      <strong>Los cupones aún no existen en la plataforma.</strong> Hoy los descuentos se manejan
+      por producto con el "precio de comparación" (sección 3): el cliente ve el precio anterior
+      tachado y el porcentaje de rebaja. Los cupones de código (ej. "BIENVENIDO10") están en la hoja
+      de ruta; cuando se implementen, este manual se actualizará con su gestión.
+    </p>
+
+    <h2><span class="num">8</span>Preguntas frecuentes</h2>
+    <dl class="faq">
+      <dt>¿Qué pasa si el cliente no paga a tiempo?</dt>
+      <dd>
+        Nada que debas hacer: a las 48 horas el pedido expira solo y las unidades vuelven al
+        inventario. Si el cliente aparece después, que haga el pedido de nuevo.
+      </dd>
+      <dt>¿Cómo sé si un producto se está agotando?</dt>
+      <dd>
+        El Dashboard lista toda variante con 3 unidades o menos. Además, en la tienda el cliente ve
+        "¡Solo X unidades!" cuando quedan pocas, y las tallas agotadas aparecen tachadas.
+      </dd>
+      <dt>Marqué un pedido como cancelado por error, ¿puedo revertirlo?</dt>
+      <dd>
+        No — cancelado es un estado final (el stock ya volvió al inventario). Pide al cliente que
+        genere el pedido otra vez; toma un minuto.
+      </dd>
+      <dt>¿Puedo cambiar el precio de un producto que ya tiene pedidos?</dt>
+      <dd>
+        Sí, sin miedo: cada pedido guarda su propia copia del precio al momento de la compra.
+        Cambiar el precio solo afecta compras futuras.
+      </dd>
+      <dt>Borré un producto, ¿perdí los pedidos donde se vendió?</dt>
+      <dd>
+        No. Los pedidos conservan nombre, código y precio de lo vendido aunque el producto ya no
+        exista.
+      </dd>
+      <dt>¿Por qué no encuentro un producto en la tienda pero sí en el panel?</dt>
+      <dd>
+        Casi seguro está marcado como inactivo (mira la etiqueta "Inactivo" en la tabla). Edítalo y
+        marca "Activo".
+      </dd>
+      <dt>¿Dónde veo la dirección de envío de un pedido?</dt>
+      <dd>Pedidos → clic en el pedido → bloque "Envío", con dirección y teléfono del cliente.</dd>
+      <dt>Un cliente quiere pagar con tarjeta, ¿se puede?</dt>
+      <dd>
+        Todavía no: el cobro con tarjeta (Stripe) está construido pero desactivado hasta tener la
+        cuenta de la pasarela. Activarlo será un cambio de configuración, sin reconstruir nada.
+      </dd>
+    </dl>
+
+    <footer>
+      <span>Mood Sense · Manual de administración v1</span>
+      <span>Wear your vibe. Make the match.</span>
+    </footer>
+  </body>
+</html>
