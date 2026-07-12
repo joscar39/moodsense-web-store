@@ -47,7 +47,9 @@ services:
     volumes:
       - meili_data:/meili_data
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:7700/health || exit 1"]
+      # 127.0.0.1 en vez de localhost: la resolución de localhost dentro del
+      # contenedor hacía fallar el check aunque el servicio estuviera sano.
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:7700/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10

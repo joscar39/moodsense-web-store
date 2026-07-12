@@ -36,7 +36,7 @@
 
 - `npm audit`: postcss transitivo dentro de next (XSS moderado, no aplicable a nuestro uso, sin fix real). Revisar al actualizar Next.
 - ~~Docker Desktop no estaba instalado en la máquina al cierre de Fase 0~~ — resuelto: Docker funciona y los 3 contenedores levantan (ver «Entorno local y troubleshooting»).
-- Healthcheck de `meilisearch` reporta "unhealthy" siendo un falso negativo (detalle en «Entorno local y troubleshooting»); decisión de ajustarlo o dejarlo, pendiente.
+- ~~Healthcheck de `meilisearch` reporta "unhealthy" siendo un falso negativo~~ — resuelto (Fase 7): el check ahora usa `127.0.0.1` en vez de `localhost` dentro del contenedor; los 3 servicios reportan healthy.
 - **Soft 404 en PDP con slug inexistente**: `/products/<slug-fantasma>` responde HTTP 200 con la UI de not-found + `<meta robots noindex>` y título de fallback (SEO-safe). Es comportamiento de streaming de Next 15 en misses de ISR on-demand: el shell del layout ya se envió cuando `notFound()` se lanza. Nota: `notFound()` nunca debe lanzarse desde `generateMetadata` (agrava el problema); el patrón usado es cargar con `React.cache`, metadata con fallback y `notFound()` solo en la página. Revisar en Fase 7 (posible `dynamicParams=false` + revalidación on-demand desde el admin).
 
 ## Estado de fases
@@ -132,7 +132,7 @@ Si no apunta ahí, correr `nvm use 22` o revisar que `~/.bash_profile` cargue `~
 
 **npm 12 bloquea install scripts nuevos.** Al instalar paquetes con scripts de instalación (prisma, esbuild, sharp…), npm los bloquea hasta aprobarlos: `npm install-scripts approve <pkg>` + `npm rebuild <pkg>`. Los aprobados quedan registrados en `package.json` (clave `allowScripts`).
 
-**Healthcheck de Meilisearch — falso negativo conocido.** El servicio `meilisearch` de `docker-compose.yml` aparece como **"unhealthy"** en `docker compose ps` aunque funciona correctamente (confirmado vía `curl http://localhost:7700/health` desde el host). Es un falso negativo relacionado a cómo `wget` resuelve `localhost` dentro del propio contenedor. **Pendiente de decisión:** ajustar el healthcheck (ej. usar `127.0.0.1` en vez de `localhost`) o dejarlo así; no bloquea el desarrollo. Mientras tanto, ignorar ese estado y validar con el `curl` anterior si hay dudas.
+**Healthcheck de Meilisearch — resuelto (2026-07-11).** El servicio aparecía "unhealthy" siendo un falso negativo: `wget` no resolvía `localhost` dentro del contenedor. El healthcheck ahora apunta a `http://127.0.0.1:7700/health` y los 3 servicios reportan healthy en `docker compose ps`.
 
 ## Convenciones del proyecto
 
