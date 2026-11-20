@@ -6,6 +6,13 @@ import { searchQuerySchema } from "@/lib/validators/catalog";
 
 import type { NextRequest } from "next/server";
 
+/**
+ * GET /api/search: búsqueda de texto libre (Meilisearch) con los filtros del PLP.
+ *
+ * @example
+ * // GET /api/search?q=hoodie&brand=nocturne
+ * // 200 { data: { items, query, total, ... } } · 400 sin q · 503 índice no sincronizado
+ */
 export async function GET(request: NextRequest) {
   try {
     const query = searchQuerySchema.parse(Object.fromEntries(request.nextUrl.searchParams));

@@ -8,10 +8,16 @@ import { Button } from "@/components/ui/button";
 import { cartCount } from "@/lib/cart/cart-logic";
 import { useCartStore } from "@/lib/cart/cart-store";
 
+/**
+ * Botón del carrito en el header con el contador de unidades.
+ *
+ * @example
+ * <CartButton />
+ */
 export function CartButton() {
   const items = useCartStore((state) => state.items);
-  // The persisted store only exists client-side; render the count after mount
-  // so server and first client render match (no hydration mismatch).
+  // El store persistido solo existe en el cliente: el contador se muestra tras
+  // montar para que el render del servidor y el primero del cliente coincidan.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 

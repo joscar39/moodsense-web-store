@@ -3,10 +3,19 @@ import { listCategoryTree } from "@/lib/catalog/categories";
 
 import type { MetadataRoute } from "next";
 
+// El sitemap se regenera como máximo una vez por hora.
 export const revalidate = 3600;
 
+/** URL pública base del sitio (fallback local en desarrollo). */
 const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+/**
+ * Genera `/sitemap.xml` para buscadores: páginas fijas, cada categoría y subcategoría
+ * y cada producto activo, con su prioridad y frecuencia de cambio.
+ *
+ * @example
+ * // GET /sitemap.xml → incluye, p. ej., https://midominio.com/products/cloud-heavy-hoodie
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = appUrl();
   const [slugs, categories] = await Promise.all([listActiveProductSlugs(), listCategoryTree()]);

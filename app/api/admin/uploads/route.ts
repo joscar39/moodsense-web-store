@@ -8,8 +8,13 @@ const MAX_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 /**
- * Sube una imagen de producto a Vercel Blob. Requiere BLOB_READ_WRITE_TOKEN
- * (503 si no está configurado — el formulario admin cae a URLs manuales).
+ * POST /api/admin/uploads (solo ADMIN): sube una imagen de producto a Vercel
+ * Blob. Requiere BLOB_READ_WRITE_TOKEN (503 si falta — el formulario admin cae
+ * a URLs manuales).
+ *
+ * @example
+ * // POST /api/admin/uploads (multipart, campo "file": JPG/PNG/WebP/AVIF ≤ 4 MB)
+ * // 201 { data: { url } } · 400 formato/tamaño · 403 · 503 sin token
  */
 export async function POST(request: Request) {
   try {
@@ -39,9 +44,12 @@ export async function POST(request: Request) {
       throw new ApiError("VALIDATION_ERROR", "La imagen supera el máximo de 4 MB.", 400);
     }
 
-    const blob = await put(`products/${file.name}`, file, {
+    // Nombre aleatorio y tipo fijado por el servidor: nunca se usa el nombre
+    // que manda el navegador (evita servir, por ejemplo, un ".html" disfrazado).
+    const extension = file.type.split("/")[1];
+    const blob = await put(`products/${crypto.randomUUID()}.${extension}`, file, {
       access: "public",
-      addRandomSuffix: true,
+      contentType: file.type,
     });
 
     return NextResponse.json({ data: { url: blob.url } }, { status: 201 });

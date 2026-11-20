@@ -11,14 +11,24 @@ import { FieldError } from "@/components/auth/field-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { readApiError } from "@/lib/api/client-errors";
+import { safeCallbackUrl } from "@/lib/auth/safe-callback-url";
 import { registerSchema } from "@/lib/validators/auth";
 
 import type { RegisterInput } from "@/lib/validators/auth";
 
+/**
+ * Formulario de registro: crea la cuenta (POST /api/auth/register), inicia
+ * sesión automáticamente y redirige al `callbackUrl` seguro (por defecto /account).
+ * Necesita un `<Suspense>` arriba porque lee los search params.
+ *
+ * @example
+ * <Suspense><RegisterForm /></Suspense>
+ */
 export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/account";
+  const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -36,13 +46,11 @@ export function RegisterForm() {
     });
 
     if (!response.ok) {
-      const body: unknown = await response.json();
-      const message = (body as { error?: { message?: string } }).error?.message;
-      setFormError(message ?? "No se pudo crear la cuenta.");
+      setFormError((await readApiError(response)) ?? "No se pudo crear la cuenta.");
       return;
     }
 
-    // Auto-login right after registering.
+    // Inicia sesión automáticamente tras registrarse.
     const result = await signIn("credentials", {
       email: data.email,
       password: data.password,

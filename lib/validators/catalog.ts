@@ -2,25 +2,26 @@ import { z } from "zod";
 
 import { Gender } from "@/lib/generated/prisma/enums";
 
-export const PRODUCT_SORT_VALUES = ["newest", "price-asc", "price-desc", "name-asc"] as const;
+const PRODUCT_SORT_VALUES = ["newest", "price-asc", "price-desc", "name-asc"] as const;
 export type ProductSort = (typeof PRODUCT_SORT_VALUES)[number];
 
 const pageSchema = z.coerce.number().int().min(1).default(1);
 const perPageSchema = z.coerce.number().int().min(1).max(60).default(12);
 
-/** Shared filter fields between /api/products (DB) and /api/search (Meilisearch). */
+/** Filtros compartidos entre /api/products (DB) y /api/search (Meilisearch). */
 const catalogFilterFields = {
   category: z.string().trim().min(1).optional(),
   brand: z.string().trim().min(1).optional(),
   gender: z.enum(Gender).optional(),
-  // Price bounds in integer cents, like every money value in the API.
+  // Límites de precio en centavos enteros, como todo valor de dinero en la API.
   minPrice: z.coerce.number().int().min(0).optional(),
   maxPrice: z.coerce.number().int().min(0).optional(),
-  // `true` filters; `false`/absent means "no filter", not "exclude".
+  // `true` filtra; `false`/ausente significa "sin filtro", no "excluir".
   onSale: z.stringbool().optional(),
   featured: z.stringbool().optional(),
 };
 
+/** `minPrice` no puede superar a `maxPrice` cuando vienen ambos. */
 const priceRangeIsValid = (query: { minPrice?: number; maxPrice?: number }) =>
   query.minPrice === undefined || query.maxPrice === undefined || query.minPrice <= query.maxPrice;
 
@@ -29,7 +30,12 @@ const PRICE_RANGE_ERROR = {
   path: ["minPrice"] as ["minPrice"],
 };
 
-/** GET /api/products query params. */
+/**
+ * Query params de GET /api/products y del PLP (paginación, orden y filtros).
+ *
+ * @example
+ * productListQuerySchema.parse({ category: "ropa", minPrice: "1000" });
+ */
 export const productListQuerySchema = z
   .object({
     page: pageSchema,
@@ -41,9 +47,14 @@ export const productListQuerySchema = z
 
 export type ProductListQuery = z.infer<typeof productListQuerySchema>;
 
-export const SEARCH_SORT_VALUES = ["relevance", "price-asc", "price-desc", "newest"] as const;
+const SEARCH_SORT_VALUES = ["relevance", "price-asc", "price-desc", "newest"] as const;
 
-/** GET /api/search query params. */
+/**
+ * Query params de GET /api/search y de /search (`q` obligatorio + filtros del PLP).
+ *
+ * @example
+ * searchQuerySchema.parse({ q: "hoodie", sort: "price-asc" });
+ */
 export const searchQuerySchema = z
   .object({
     q: z

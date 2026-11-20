@@ -1,6 +1,9 @@
 /**
- * Next.js `searchParams` values can be arrays (repeated keys); Zod schemas
- * expect scalars, so keep the first occurrence and drop the rest.
+ * Normaliza los `searchParams` de Next.js: si una clave viene repetida (array)
+ * se queda con el primer valor. Para qué: los schemas Zod esperan escalares.
+ *
+ * @example
+ * firstSearchParamValues({ brand: ["nike", "adidas"], page: "2" }); // { brand: "nike", page: "2" }
  */
 export function firstSearchParamValues(
   params: Record<string, string | string[] | undefined>

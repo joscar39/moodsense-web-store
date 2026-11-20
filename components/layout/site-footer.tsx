@@ -2,6 +2,12 @@ import Link from "next/link";
 
 import type { NavLink } from "./site-header";
 
+/**
+ * Pie de página boutique (navy + dorado) con marca, slogan, enlaces de categorías y ayuda.
+ *
+ * @example
+ * <SiteFooter navLinks={[{ label: "Gorras", href: "/products?category=gorras" }]} />
+ */
 export function SiteFooter({ navLinks }: { navLinks: NavLink[] }) {
   return (
     <footer className="dark mt-20 bg-navy text-foreground">

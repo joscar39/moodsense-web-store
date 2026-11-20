@@ -9,6 +9,12 @@ import { FiltersPanel } from "./filters-panel";
 
 import type { FilterBrand, FilterCategory } from "./filters-panel";
 
+/**
+ * Botón "Filtros" para móvil que abre `FiltersPanel` en un panel lateral. Oculto en desktop.
+ *
+ * @example
+ * <MobileFilters categories={categories} brands={brands} />
+ */
 export function MobileFilters({
   categories,
   brands,

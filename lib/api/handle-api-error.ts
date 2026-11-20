@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { z, ZodError } from "zod";
 
-/** Error with a stable machine-readable code and HTTP status, thrown from services. */
+/**
+ * Error de negocio con código estable, status HTTP y detalle opcional. Lo lanzan
+ * los servicios y `handleApiError` lo convierte en respuesta.
+ *
+ * @example
+ * throw new ApiError("EMAIL_TAKEN", "Ya existe una cuenta con este email.", 409);
+ */
 export class ApiError extends Error {
   constructor(
     readonly code: string,
@@ -18,20 +24,28 @@ type ApiErrorBody = {
   error: { code: string; message: string; details?: unknown };
 };
 
-/** Duck-typed to avoid importing the Prisma client into this module. */
-function isPrismaUniqueViolation(error: unknown): boolean {
+/**
+ * Indica si `error` es un error de Prisma con ese código (p. ej. "P2002").
+ * Se comprueba por forma para no importar el cliente de Prisma en este módulo.
+ */
+function isPrismaError(error: unknown, code: string): boolean {
   return (
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
-    (error as { code?: unknown }).code === "P2002"
+    (error as { code?: unknown }).code === code
   );
 }
 
 /**
- * Central error mapper for all route handlers: ZodError → 400, ApiError → its
- * status, malformed JSON → 400, anything else → opaque 500 (internals are
- * logged server-side, never leaked to the client).
+ * Traduce cualquier error de un route handler a `{ error: { code, message } }`:
+ * ZodError → 400, ApiError → su status, P2002 → 409, P2003 → 404, JSON
+ * malformado → 400 y el resto → 500 opaco (el detalle solo va al log del servidor).
+ *
+ * @example
+ * export async function POST(request: Request) {
+ *   try { ... } catch (error) { return handleApiError(error); }
+ * }
  */
 export function handleApiError(error: unknown): NextResponse<ApiErrorBody> {
   if (error instanceof ZodError) {
@@ -60,8 +74,8 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorBody> {
     );
   }
 
-  // Prisma unique-constraint violation (P2002), e.g. duplicated slug or SKU.
-  if (isPrismaUniqueViolation(error)) {
+  // Violación de unicidad de Prisma (P2002), p. ej. slug o SKU duplicado.
+  if (isPrismaError(error, "P2002")) {
     return NextResponse.json(
       {
         error: {
@@ -73,6 +87,15 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorBody> {
     );
   }
 
+  // Violación de clave foránea de Prisma (P2003): el registro referenciado no
+  // existe (p. ej. añadir a la wishlist un producto borrado).
+  if (isPrismaError(error, "P2003")) {
+    return NextResponse.json(
+      { error: { code: "NOT_FOUND", message: "El recurso relacionado no existe." } },
+      { status: 404 }
+    );
+  }
+
   if (error instanceof SyntaxError) {
     return NextResponse.json(
       { error: { code: "INVALID_JSON", message: "El cuerpo de la petición no es JSON válido." } },
@@ -80,7 +103,8 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorBody> {
     );
   }
 
-  console.error("[api] unhandled error:", error);
+  // Solo el mensaje: el objeto completo puede arrastrar datos de la consulta.
+  console.error("[api] unhandled error:", error instanceof Error ? error.message : error);
   return NextResponse.json(
     { error: { code: "INTERNAL_ERROR", message: "Error interno del servidor." } },
     { status: 500 }

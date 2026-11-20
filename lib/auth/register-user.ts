@@ -6,9 +6,13 @@ import { hashPassword } from "./password";
 import type { RegisterInput } from "@/lib/validators/auth";
 
 /**
- * Creates a credentials user with a bcrypt-hashed password.
- * Throws ApiError EMAIL_TAKEN (409) if the email is already registered
- * (including OAuth-only accounts, which must sign in with their provider).
+ * Crea un usuario de credenciales con la contraseña hasheada (bcrypt).
+ * Lanza EMAIL_TAKEN (409) si el email ya existe, incluidas cuentas solo-OAuth
+ * (que deben entrar con su provider).
+ *
+ * @example
+ * const user = await registerUser({ name: "Ana", email: "ana@example.com", password: "segura1234" });
+ * // { id, name, email, role }
  */
 export async function registerUser(input: RegisterInput) {
   const existing = await prisma.user.findUnique({

@@ -9,6 +9,12 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Mi wishlist" };
 
+/**
+ * Página /account/wishlist: grid de productos guardados con botón para quitarlos.
+ *
+ * @example
+ * // GET /account/wishlist → tarjetas de producto de la wishlist
+ */
 export default async function WishlistPage() {
   const session = await auth();
   const items = await listWishlist(session!.user.id);

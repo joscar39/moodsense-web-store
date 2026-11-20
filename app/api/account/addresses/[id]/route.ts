@@ -7,6 +7,13 @@ import { addressSchema } from "@/lib/validators/account";
 
 type Context = { params: Promise<{ id: string }> };
 
+/**
+ * PATCH /api/account/addresses/[id]: actualiza una dirección propia.
+ *
+ * @example
+ * // PATCH /api/account/addresses/a1 { ...dirección, isDefault: true }
+ * // 200 { data: { id, ... } } · 400 · 401 · 404 (ajena o inexistente)
+ */
 export async function PATCH(request: Request, context: Context) {
   try {
     const user = await requireUser();
@@ -20,6 +27,13 @@ export async function PATCH(request: Request, context: Context) {
   }
 }
 
+/**
+ * DELETE /api/account/addresses/[id]: borra una dirección propia (promueve otra
+ * a principal si hacía falta).
+ *
+ * @example
+ * // DELETE /api/account/addresses/a1 → 200 { data: { deleted: true } } · 401 · 404
+ */
 export async function DELETE(_request: Request, context: Context) {
   try {
     const user = await requireUser();

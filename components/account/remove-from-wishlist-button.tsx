@@ -6,6 +6,12 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+/**
+ * Botón (X) sobre la tarjeta que quita el producto de la wishlist y refresca la página.
+ *
+ * @example
+ * <RemoveFromWishlistButton productId={item.productId} productName={item.name} />
+ */
 export function RemoveFromWishlistButton({
   productId,
   productName,

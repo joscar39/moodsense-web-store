@@ -1,26 +1,14 @@
 import { formatPrice } from "@/lib/format/price";
 
 /**
- * Abstracción del envío de WhatsApp al operador de la tienda.
+ * Avisos por WhatsApp al operador de la tienda.
  *
- * Implementaciones:
- * - CloudApiWhatsappNotifier: WhatsApp Business Cloud API de Meta (opción
- *   oficial más económica: capa gratuita amplia, sin intermediarios). Se
- *   activa automáticamente cuando WHATSAPP_CLOUD_API_TOKEN y
- *   WHATSAPP_CLOUD_PHONE_NUMBER_ID están configurados. Requiere verificación
- *   de negocio en Meta para producción.
- * - ConsoleWhatsappNotifier: fallback provisional mientras se gestiona el
- *   acceso a la API — loggea el mensaje completo y un link wa.me listo para
- *   reenviar por cualquier canal.
- *
- * Cambiar de proveedor = una sola implementación nueva de WhatsappNotifier;
- * el resto del flujo no se toca.
+ * El resto del código solo usa `buildOrderMessage` y `notifyOperator`; el
+ * proveedor concreto (hoy, la WhatsApp Business Cloud API de Meta) queda
+ * escondido en este archivo. Cambiar de proveedor = cambiar solo este módulo.
  */
-export interface WhatsappNotifier {
-  sendToOperator(message: string): Promise<void>;
-}
 
-export type OrderMessageData = {
+type OrderMessageData = {
   orderId: string;
   customerName: string;
   customerPhone: string;
@@ -30,7 +18,23 @@ export type OrderMessageData = {
   totalCents: number;
 };
 
-/** Mensaje de pedido para el operador, legible en WhatsApp. */
+/**
+ * Arma el texto del aviso de un pedido nuevo, listo para leer en WhatsApp.
+ *
+ * Para qué: es el mensaje que recibe el operador para contactar al cliente y
+ * coordinar el pago.
+ *
+ * @example
+ * buildOrderMessage({
+ *   orderId: "cm1abc",
+ *   customerName: "Ana Pérez",
+ *   customerPhone: "+1 809 555 0100",
+ *   shipping: "Calle 1, Santo Domingo, DO",
+ *   lines: [{ name: "Gorra Logo", variantLabel: "Negro", quantity: 2, unitPriceCents: 2500 }],
+ *   totalCents: 5000,
+ * });
+ * // "🛍️ *NUEVO PEDIDO — Mood Sense*\n\nPedido: cm1abc\n\n• 2 × Gorra Logo (Negro) — $50.00 ..."
+ */
 export function buildOrderMessage(data: OrderMessageData): string {
   const items = data.lines
     .map(
@@ -57,56 +61,45 @@ export function buildOrderMessage(data: OrderMessageData): string {
   ].join("\n");
 }
 
-class CloudApiWhatsappNotifier implements WhatsappNotifier {
-  constructor(
-    private readonly token: string,
-    private readonly phoneNumberId: string,
-    private readonly operatorPhone: string
-  ) {}
-
-  async sendToOperator(message: string): Promise<void> {
-    const response = await fetch(
-      `https://graph.facebook.com/v21.0/${this.phoneNumberId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: this.operatorPhone,
-          type: "text",
-          text: { body: message },
-        }),
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`WhatsApp Cloud API respondió ${response.status}: ${await response.text()}`);
-    }
-  }
-}
-
-class ConsoleWhatsappNotifier implements WhatsappNotifier {
-  constructor(private readonly operatorPhone: string | undefined) {}
-
-  async sendToOperator(message: string): Promise<void> {
-    const waLink = this.operatorPhone
-      ? `https://wa.me/${this.operatorPhone}?text=${encodeURIComponent(message)}`
-      : "(configura WHATSAPP_OPERATOR_PHONE para generar el link wa.me)";
-    console.log(
-      `[whatsapp] Notificación de pedido (modo provisional — sin Cloud API):\n${message}\n\n[whatsapp] Link directo: ${waLink}`
-    );
-  }
-}
-
-export function getWhatsappNotifier(): WhatsappNotifier {
+/**
+ * Envía `message` al WhatsApp del operador (WHATSAPP_OPERATOR_PHONE).
+ *
+ * - Con WHATSAPP_CLOUD_API_TOKEN y WHATSAPP_CLOUD_PHONE_NUMBER_ID configurados,
+ *   lo manda por la Cloud API de Meta. Meta solo entrega texto libre si el
+ *   operador escribió al número emisor en las últimas 24 h.
+ * - Sin esas claves, NO envía nada: deja en el log solo el id del pedido (nunca
+ *   datos personales del cliente). El operador ve el pedido en el panel admin.
+ *
+ * Lanza un error si Meta responde con fallo; quien la llama decide qué hacer
+ * (el checkout lo registra y sigue, porque el pedido ya está guardado).
+ *
+ * @example
+ * await notifyOperator(buildOrderMessage(data), data.orderId);
+ */
+export async function notifyOperator(message: string, orderId: string): Promise<void> {
   const token = process.env.WHATSAPP_CLOUD_API_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID;
-  const operatorPhone = process.env.WHATSAPP_OPERATOR_PHONE;
+  // Solo dígitos: tolera que el número se haya cargado con "+", espacios o guiones.
+  const operatorPhone = process.env.WHATSAPP_OPERATOR_PHONE?.replace(/\D/g, "");
 
-  if (token && phoneNumberId && operatorPhone) {
-    return new CloudApiWhatsappNotifier(token, phoneNumberId, operatorPhone);
+  if (!token || !phoneNumberId || !operatorPhone) {
+    console.log(
+      `[whatsapp] Pedido ${orderId} recibido. Aviso automático desactivado (falta configurar la Cloud API): revisar el panel admin.`
+    );
+    return;
   }
-  return new ConsoleWhatsappNotifier(operatorPhone);
+
+  const response = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to: operatorPhone,
+      type: "text",
+      text: { body: message },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`WhatsApp Cloud API respondió ${response.status}`);
+  }
 }

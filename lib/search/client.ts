@@ -1,9 +1,12 @@
 import { Meilisearch } from "meilisearch";
 
 /**
- * Server-side Meilisearch client authenticated with the MASTER key.
- * Never import from client components — the browser must use the public
- * search-only key (NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY).
+ * Cliente de Meilisearch del servidor, autenticado con la MASTER key. Nunca
+ * importarlo desde componentes cliente: el navegador no habla con Meilisearch,
+ * busca a través de GET /api/search.
+ *
+ * @example
+ * const index = getMeiliClient().index("products");
  */
 export function getMeiliClient(): Meilisearch {
   const host = process.env.MEILISEARCH_HOST;

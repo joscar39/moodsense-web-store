@@ -4,7 +4,13 @@ import { useEffect } from "react";
 
 import { useCartStore } from "@/lib/cart/cart-store";
 
-/** Rendered on the success page: the purchase is done, empty the local cart. */
+/**
+ * Vacía el carrito local al montarse. Se usa en las páginas de confirmación:
+ * el pedido ya está hecho. No renderiza nada.
+ *
+ * @example
+ * <ClearCartOnMount />
+ */
 export function ClearCartOnMount() {
   const clear = useCartStore((state) => state.clear);
   useEffect(() => clear(), [clear]);

@@ -1,6 +1,12 @@
 import Stripe from "stripe";
 
-/** Server-side Stripe client. The secret key never reaches the browser. */
+/**
+ * Crea el cliente de Stripe del servidor (la clave secreta nunca llega al navegador).
+ * Lanza si falta STRIPE_SECRET_KEY.
+ *
+ * @example
+ * const session = await getStripe().checkout.sessions.create({ ... });
+ */
 export function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {

@@ -9,9 +9,16 @@ import { listCategoryTree } from "@/lib/catalog/categories";
 import { listProducts } from "@/lib/catalog/products";
 import { productListQuerySchema } from "@/lib/validators/catalog";
 
-// ISR: the home is fully static and revalidates every 5 minutes.
+// ISR: la home es estática y se regenera cada 5 minutos.
 export const revalidate = 300;
 
+/**
+ * Home (`/`): hero con el slogan, franja de marcas, destacados, tiles de categoría,
+ * banda boutique y novedades. Los datos se leen en paralelo desde `lib/catalog`.
+ *
+ * @example
+ * // GET / → muestra 4 productos destacados y los 8 más recientes.
+ */
 export default async function HomePage() {
   const [featured, newest, categories, brands] = await Promise.all([
     listProducts(productListQuerySchema.parse({ featured: "true", perPage: "4" })),

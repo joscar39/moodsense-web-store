@@ -5,6 +5,13 @@ import { handleApiError } from "@/lib/api/handle-api-error";
 import { requireUser } from "@/lib/auth/require-user";
 import { passwordChangeSchema } from "@/lib/validators/account";
 
+/**
+ * POST /api/account/password: cambia la contraseña verificando la actual.
+ *
+ * @example
+ * // POST /api/account/password { currentPassword, newPassword }
+ * // 200 { data: { updated: true } } · 400 (actual incorrecta / solo Google) · 401
+ */
 export async function POST(request: Request) {
   try {
     const user = await requireUser();

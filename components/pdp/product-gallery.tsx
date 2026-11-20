@@ -3,8 +3,16 @@
 import Image from "next/image";
 import { useState } from "react";
 
+/** Imagen de la galería (URL + texto alternativo). */
 type GalleryImage = { url: string; alt: string };
 
+/**
+ * Galería de la ficha de producto: imagen principal grande y miniaturas para cambiarla.
+ * Muestra "Sin imagen" si el producto no tiene ninguna.
+ *
+ * @example
+ * <ProductGallery name="Cloud Heavy Hoodie" images={[{ url: "https://…/front.png", alt: "Vista frontal" }]} />
+ */
 export function ProductGallery({ images, name }: { images: GalleryImage[]; name: string }) {
   const [selected, setSelected] = useState(0);
   const active = images[selected];

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+/** Datos mínimos de una categoría raíz para pintar su tile. */
 type CategoryTile = {
   slug: string;
   name: string;
@@ -8,6 +9,15 @@ type CategoryTile = {
   children: { productCount: number }[];
 };
 
+/**
+ * Grilla de tiles de categorías raíz con el total de piezas (propias + subcategorías);
+ * cada tile lleva al catálogo filtrado por esa categoría.
+ *
+ * @example
+ * <CategoryTiles
+ *   categories={[{ slug: "camisetas", name: "Camisetas", description: null, productCount: 3, children: [] }]}
+ * />
+ */
 export function CategoryTiles({ categories }: { categories: CategoryTile[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

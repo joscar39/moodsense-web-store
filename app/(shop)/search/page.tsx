@@ -13,6 +13,12 @@ export const metadata: Metadata = { title: "Buscar" };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+/**
+ * Página /search: búsqueda de texto libre sobre Meilisearch reutilizando el grid del PLP.
+ *
+ * @example
+ * // GET /search?q=hoodie&sort=price-asc
+ */
 export default async function SearchPage({ searchParams }: { searchParams: SearchParams }) {
   const raw = firstSearchParamValues(await searchParams);
   const parsed = searchQuerySchema.safeParse(raw);
@@ -35,6 +41,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
   );
 }
 
+/**
+ * Resultados de búsqueda paginados (Server Component dentro de Suspense).
+ *
+ * @example
+ * <SearchResults query={query} rawParams={raw} />
+ */
 async function SearchResults({
   query,
   rawParams,

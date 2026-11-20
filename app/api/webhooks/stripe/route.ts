@@ -6,8 +6,13 @@ import { getStripe } from "@/lib/stripe/client";
 import type Stripe from "stripe";
 
 /**
- * Stripe webhook. The signature is verified against the RAW body before
- * anything else — an invalid or missing signature is rejected with 400.
+ * POST /api/webhooks/stripe: eventos de Stripe. La firma se verifica sobre el
+ * body CRUDO antes que nada; firma ausente o inválida → 400.
+ * `checkout.session.completed` (pagado) marca el pedido PAID; `expired` lo cancela.
+ *
+ * @example
+ * // Lo llama Stripe con el header `stripe-signature`:
+ * // 200 { received: true } · 400 firma ausente/inválida · 500 webhook sin configurar
  */
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -27,8 +32,8 @@ export async function POST(request: Request) {
     );
   }
 
-  // Instantiation failures (missing STRIPE_SECRET_KEY) are config errors,
-  // not signature errors — keep them out of the 400 branch.
+  // Si falla la creación del cliente (falta STRIPE_SECRET_KEY) es un error de
+  // configuración, no de firma: no debe caer en la rama 400.
   let stripe: ReturnType<typeof getStripe>;
   try {
     stripe = getStripe();
@@ -64,7 +69,7 @@ export async function POST(request: Request) {
       break;
     }
     default:
-      // Unhandled event types are acknowledged so Stripe stops retrying.
+      // Los eventos no manejados se confirman para que Stripe deje de reintentar.
       break;
   }
 

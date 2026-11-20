@@ -5,6 +5,12 @@ import { signOut } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 
+/**
+ * Botón "Cerrar sesión": cierra la sesión de Auth.js y vuelve a la home.
+ *
+ * @example
+ * <SignOutButton />
+ */
 export function SignOutButton() {
   return (
     <Button

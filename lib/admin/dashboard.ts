@@ -2,14 +2,18 @@ import { prisma } from "@/lib/db/prisma";
 
 import type { OrderStatus } from "@/lib/generated/prisma/enums";
 
-/** Orders that count as revenue. */
+/** Estados de pedido que cuentan como ingreso. */
 const REVENUE_STATUSES: OrderStatus[] = ["PAID", "SHIPPED", "DELIVERED"];
 
 const LOW_STOCK_THRESHOLD = 3;
 
 /**
- * Sales dashboard metrics, aggregated in the DB. `now` is injectable so the
- * 30-day window is deterministic in tests.
+ * Métricas del dashboard de ventas, agregadas en la DB: ingresos, pedidos y
+ * ticket promedio (total y últimos 30 días), pendientes, stock bajo (<= 3),
+ * últimos pedidos y top productos. `now` es inyectable para tests deterministas.
+ *
+ * @example
+ * const { revenueCents, last30, lowStock } = await getDashboardMetrics();
  */
 export async function getDashboardMetrics(now = new Date()) {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);

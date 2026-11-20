@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+// Email distinto en cada ejecución para que el registro no choque con usuarios previos.
 const uniqueEmail = () => `e2e-${Date.now()}@test.dev`;
 
 test.describe("autenticación", () => {
+  // Un visitante nuevo se registra y entra directo a su cuenta (auto-login).
   test("registro → auto-login → área de cuenta", async ({ page }) => {
     await page.goto("/register");
     await page.getByLabel("Nombre").fill("E2E Playwright");
@@ -14,6 +16,7 @@ test.describe("autenticación", () => {
     await expect(page.getByRole("heading", { name: /Hola, E2E/ })).toBeVisible();
   });
 
+  // El cliente del seed inicia sesión, ve su cuenta y cierra sesión.
   test("login con usuario del seed y logout", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("cliente@moodsense.dev");
@@ -27,6 +30,7 @@ test.describe("autenticación", () => {
     await page.waitForURL((url) => !url.pathname.startsWith("/account"));
   });
 
+  // Con una contraseña errónea se muestra el error y el usuario sigue en /login.
   test("credenciales incorrectas muestran error y no crean sesión", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("cliente@moodsense.dev");
@@ -37,11 +41,13 @@ test.describe("autenticación", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
+  // Un visitante sin sesión que abre /account es enviado al login.
   test("/account anónimo redirige a login", async ({ page }) => {
     await page.goto("/account");
     await expect(page).toHaveURL(/\/login\?callbackUrl=/);
   });
 
+  // Un cliente normal (USER) es rechazado al intentar abrir el panel admin.
   test("un USER no puede entrar a /admin", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("cliente@moodsense.dev");
@@ -54,6 +60,7 @@ test.describe("autenticación", () => {
     await expect(page.getByRole("heading", { name: "Administración" })).not.toBeVisible();
   });
 
+  // El administrador inicia sesión y ve el dashboard de ventas.
   test("el ADMIN ve el dashboard", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("admin@moodsense.dev");

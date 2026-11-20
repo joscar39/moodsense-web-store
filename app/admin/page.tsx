@@ -4,6 +4,7 @@ import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { getDashboardMetrics } from "@/lib/admin/dashboard";
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
 import { formatPrice } from "@/lib/format/price";
+import { variantLabel } from "@/lib/format/variant-label";
 
 import type { Metadata } from "next";
 
@@ -11,6 +12,13 @@ export const metadata: Metadata = { title: "Dashboard" };
 
 const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "medium" });
 
+/**
+ * Página /admin: dashboard de ventas (KPIs, últimos pedidos, top productos y
+ * alertas de stock bajo).
+ *
+ * @example
+ * // GET /admin → métricas de ventas del panel
+ */
 export default async function AdminDashboardPage() {
   await requireAdminPage();
   const metrics = await getDashboardMetrics();
@@ -100,7 +108,7 @@ export default async function AdminDashboardPage() {
                     {variant.product.name}
                     <span className="text-muted-foreground">
                       {" "}
-                      {[variant.color, variant.size].filter(Boolean).join(" · ")}
+                      {variantLabel(variant.color, variant.size)}
                     </span>
                   </span>
                   <span className="font-mono text-xs text-muted-foreground">{variant.sku}</span>

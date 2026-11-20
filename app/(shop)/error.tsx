@@ -4,6 +4,14 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 
+/**
+ * Pantalla de error de la tienda: si una página de `(shop)` falla, muestra un mensaje
+ * amable con botón "Reintentar" (vuelve a renderizar la sección) y registra el error en consola.
+ *
+ * @example
+ * // Next.js la monta sola cuando falla, p. ej., /products:
+ * // <ShopError error={error} reset={reintentar} />
+ */
 export default function ShopError({
   error,
   reset,

@@ -1,3 +1,8 @@
+/**
+ * Seed de desarrollo (`npm run db:seed`): borra catálogo y pedidos y vuelve a crear
+ * marcas, categorías, productos con variantes e imágenes, y los usuarios demo (admin y cliente).
+ * Idempotente: se puede correr las veces que haga falta.
+ */
 import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -7,14 +12,14 @@ import { PrismaClient } from "../lib/generated/prisma/client";
 
 import type { Gender } from "../lib/generated/prisma/enums";
 
-// Standalone client (the lib/db singleton uses the "@/" alias, which tsx
-// does not resolve outside Next).
+// Cliente independiente (el singleton de lib/db usa el alias "@/", que tsx
+// no resuelve fuera de Next).
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
 
 // ---------------------------------------------------------------------------
-// Data
+// Datos
 // ---------------------------------------------------------------------------
 
 const BRANDS = [
@@ -338,21 +343,40 @@ const PRODUCTS: SeedProduct[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Funciones auxiliares
 // ---------------------------------------------------------------------------
 
 const SIZE_CODE: Record<string, string> = { S: "S", M: "M", L: "L", XL: "XL" };
 
+/**
+ * Arma el SKU de una variante: `MS-<marca>-<nº de producto>-<talla>` ("OS" = talla única).
+ *
+ * @example
+ * skuFor("ATL", 6, "M"); // → "MS-ATL-006-M"
+ */
 function skuFor(brandCode: string, seq: number, size: string | null) {
   const sizePart = size ? (SIZE_CODE[size] ?? size) : "OS";
   return `MS-${brandCode}-${String(seq).padStart(3, "0")}-${sizePart}`;
 }
 
-/** Deterministic pseudo-stock so re-seeding is reproducible. */
+/**
+ * Stock pseudoaleatorio determinista (entre 4 y 15) para que cada re-seed sea reproducible.
+ *
+ * @example
+ * stockFor(0, 0); // → 4
+ */
 function stockFor(productIndex: number, variantIndex: number) {
   return ((productIndex * 7 + variantIndex * 3) % 12) + 4;
 }
 
+/**
+ * URL de una imagen placeholder 900×1200 con el nombre del producto, en paleta
+ * editorial (crema) o boutique (navy/dorado).
+ *
+ * @example
+ * imageUrl("Cloud Heavy Hoodie", true);
+ * // → "https://placehold.co/900x1200/0B1A33/C9A876/png?text=Cloud+Heavy+Hoodie"
+ */
 function imageUrl(name: string, dark: boolean) {
   const text = encodeURIComponent(name).replace(/%20/g, "+");
   return dark
@@ -364,10 +388,17 @@ function imageUrl(name: string, dark: boolean) {
 // Seed
 // ---------------------------------------------------------------------------
 
+/**
+ * Ejecuta el seed completo: limpia catálogo y pedidos (en orden seguro de claves foráneas),
+ * crea/actualiza los usuarios demo y crea marcas, categorías y productos.
+ *
+ * @example
+ * // npm run db:seed   (equivale a: npx prisma db seed)
+ */
 async function main() {
   console.log("→ Seeding Mood Sense…");
 
-  // Idempotent re-seed: wipe catalog + commerce data (FK-safe order), keep users.
+  // Re-seed idempotente: borra catálogo + comercio (orden seguro de FKs), conserva usuarios.
   await prisma.wishlistItem.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -377,7 +408,7 @@ async function main() {
   await prisma.category.deleteMany();
   await prisma.brand.deleteMany();
 
-  // Users -------------------------------------------------------------------
+  // Usuarios -------------------------------------------------------------------
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "admin1234";
   const userPassword = process.env.SEED_USER_PASSWORD ?? "cliente1234";
 
@@ -403,7 +434,7 @@ async function main() {
   });
   console.log("  ✓ users (admin@moodsense.dev, cliente@moodsense.dev)");
 
-  // Brands ------------------------------------------------------------------
+  // Marcas ------------------------------------------------------------------
   const brandIdByCode = new Map<string, string>();
   for (const brand of BRANDS) {
     const created = await prisma.brand.create({
@@ -413,7 +444,7 @@ async function main() {
   }
   console.log(`  ✓ ${BRANDS.length} brands`);
 
-  // Categories --------------------------------------------------------------
+  // Categorías --------------------------------------------------------------
   const categoryIdBySlug = new Map<string, string>();
   for (const category of CATEGORIES) {
     const parent = await prisma.category.create({
@@ -430,7 +461,7 @@ async function main() {
   }
   console.log(`  ✓ ${categoryIdBySlug.size} categories`);
 
-  // Products ----------------------------------------------------------------
+  // Productos ----------------------------------------------------------------
   let variantCount = 0;
   for (const [index, product] of PRODUCTS.entries()) {
     const seq = index + 1;

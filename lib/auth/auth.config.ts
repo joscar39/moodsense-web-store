@@ -1,17 +1,22 @@
 import type { NextAuthConfig } from "next-auth";
 
 /**
- * Edge-safe Auth.js config: no adapter, no Prisma, no bcrypt imports, so the
- * middleware can instantiate NextAuth from it. The full config (adapter +
- * providers) lives in lib/auth/index.ts.
+ * Config de Auth.js apta para Edge: sin adapter, Prisma ni bcrypt, para que el
+ * middleware pueda instanciar NextAuth con ella. La config completa (adapter +
+ * providers) está en lib/auth/index.ts.
+ *
+ * @example
+ * export default NextAuth(authConfig).auth; // middleware.ts
  */
 export const authConfig = {
-  session: { strategy: "jwt" },
+  // Sesiones de 8 horas (el default de Auth.js es 30 días): una sesión robada
+  // o un rol retirado dejan de valer pronto.
+  session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   pages: { signIn: "/login" },
   providers: [],
   callbacks: {
     jwt({ token, user }) {
-      // `user` is only defined on sign-in; persist id and role in the token.
+      // `user` solo existe al iniciar sesión: guarda id y rol en el token.
       if (user) {
         token.id = user.id as string;
         token.role = user.role;
@@ -24,7 +29,7 @@ export const authConfig = {
       return session;
     },
     authorized({ auth, request }) {
-      // Server-side gate for protected routes (see middleware.ts matcher).
+      // Control en servidor de las rutas protegidas (ver el matcher de middleware.ts).
       const { pathname } = request.nextUrl;
       if (pathname.startsWith("/admin")) {
         return auth?.user?.role === "ADMIN";

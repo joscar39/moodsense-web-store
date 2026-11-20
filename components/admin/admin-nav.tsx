@@ -9,6 +9,12 @@ const LINKS = [
   { href: "/admin/orders", label: "Pedidos" },
 ];
 
+/**
+ * Navegación lateral del panel admin; resalta la sección activa según la URL.
+ *
+ * @example
+ * <AdminNav />
+ */
 export function AdminNav() {
   const pathname = usePathname();
 

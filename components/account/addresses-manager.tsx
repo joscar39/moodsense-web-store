@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -12,37 +13,45 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { readApiError } from "@/lib/api/client-errors";
 import { addressSchema } from "@/lib/validators/account";
 
-import type { AddressFormInput, AddressInput } from "@/lib/validators/account";
+import type { AddressFormInput } from "@/lib/validators/account";
 
-export type Address = AddressInput & { id: string };
+/** Dirección tal como la devuelve la DB (los opcionales vienen como `null`). */
+export type Address = {
+  id: string;
+  fullName: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+  phone: string | null;
+  isDefault: boolean;
+};
 
-async function readError(response: Response) {
-  const body: unknown = await response.json().catch(() => null);
-  return (body as { error?: { message?: string } } | null)?.error?.message;
-}
-
-export function AddressesManager({ initialAddresses }: { initialAddresses: Address[] }) {
-  const [addresses, setAddresses] = useState(initialAddresses);
+/**
+ * Gestión de direcciones de "Mi cuenta": lista, alta, edición y borrado.
+ * Las direcciones llegan por props desde el Server Component; tras cada
+ * mutación `router.refresh()` vuelve a renderizar la página con datos frescos.
+ *
+ * @example
+ * <AddressesManager addresses={await listAddresses(userId)} />
+ */
+export function AddressesManager({ addresses }: { addresses: Address[] }) {
+  const router = useRouter();
   const [editing, setEditing] = useState<Address | "new" | null>(null);
-
-  const refresh = async () => {
-    const response = await fetch("/api/account/addresses");
-    if (response.ok) {
-      const body = (await response.json()) as { data: Address[] };
-      setAddresses(body.data);
-    }
-  };
 
   const remove = async (address: Address) => {
     const response = await fetch(`/api/account/addresses/${address.id}`, { method: "DELETE" });
     if (!response.ok) {
-      toast.error((await readError(response)) ?? "No se pudo eliminar la dirección.");
+      toast.error((await readApiError(response)) ?? "No se pudo eliminar la dirección.");
       return;
     }
     toast.success("Dirección eliminada.");
-    await refresh();
+    router.refresh();
   };
 
   return (
@@ -63,9 +72,9 @@ export function AddressesManager({ initialAddresses }: { initialAddresses: Addre
       {editing !== null ? (
         <AddressForm
           address={editing === "new" ? null : editing}
-          onDone={async (saved) => {
+          onDone={(saved) => {
             setEditing(null);
-            if (saved) await refresh();
+            if (saved) router.refresh();
           }}
         />
       ) : addresses.length === 0 ? (
@@ -127,6 +136,29 @@ export function AddressesManager({ initialAddresses }: { initialAddresses: Addre
   );
 }
 
+/**
+ * Convierte una dirección guardada en valores del formulario (`null` → `undefined`).
+ *
+ * @example
+ * toFormValues({ ...address, line2: null }); // { ...address, line2: undefined }
+ */
+function toFormValues({ line2, state, phone, ...rest }: Address): AddressFormInput {
+  // `id` viaja en `rest` pero zod lo descarta al validar el envío.
+  return {
+    ...rest,
+    line2: line2 ?? undefined,
+    state: state ?? undefined,
+    phone: phone ?? undefined,
+  };
+}
+
+/**
+ * Formulario de alta/edición de una dirección; llama a `onDone(true)` al guardar
+ * y a `onDone(false)` al cancelar.
+ *
+ * @example
+ * <AddressForm address={null} onDone={(saved) => setEditing(null)} />
+ */
 function AddressForm({
   address,
   onDone,
@@ -142,7 +174,7 @@ function AddressForm({
     formState: { errors, isSubmitting },
   } = useForm<AddressFormInput>({
     resolver: zodResolver(addressSchema),
-    defaultValues: address ?? { country: "DO", isDefault: false },
+    defaultValues: address ? toFormValues(address) : { country: "DO", isDefault: false },
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -155,7 +187,7 @@ function AddressForm({
       }
     );
     if (!response.ok) {
-      toast.error((await readError(response)) ?? "No se pudo guardar la dirección.");
+      toast.error((await readApiError(response)) ?? "No se pudo guardar la dirección.");
       return;
     }
     toast.success(address ? "Dirección actualizada." : "Dirección añadida.");

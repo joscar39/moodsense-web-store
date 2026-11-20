@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mood Sense — Publicar la tienda en internet</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 20mm 18mm;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 10.5pt;
+        line-height: 1.55;
+      }
+      header.cover {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 42px 40px;
+        margin-bottom: 30px;
+      }
+      header.cover .eyebrow {
+        font-size: 9pt;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #c9a876;
+        margin-bottom: 12px;
+      }
+      header.cover h1 {
+        font-family: Georgia, serif;
+        font-size: 26pt;
+        font-weight: 500;
+      }
+      header.cover p {
+        margin-top: 10px;
+        color: rgba(245, 243, 239, 0.85);
+        max-width: 36em;
+      }
+      h2 {
+        font-family: Georgia, serif;
+        font-size: 16pt;
+        font-weight: 500;
+        margin: 30px 0 10px;
+        padding: 8px 0 6px;
+        border-bottom: 2px solid #0b1a33;
+        page-break-after: avoid;
+      }
+      h2 .num {
+        color: #c9a876;
+        margin-right: 8px;
+      }
+      h3 {
+        font-size: 11pt;
+        margin: 16px 0 6px;
+        color: #0b1a33;
+        page-break-after: avoid;
+      }
+      p {
+        margin: 6px 0;
+      }
+      ol,
+      ul {
+        margin: 6px 0 10px 22px;
+      }
+      li {
+        margin: 4px 0;
+      }
+      .tip {
+        background: #f5f3ef;
+        border-left: 4px solid #c9a876;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .warn {
+        background: #fdf2f2;
+        border-left: 4px solid #c0392b;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .path {
+        background: #eef1f6;
+        border: 1px solid #d5dae5;
+        border-radius: 3px;
+        padding: 1px 6px;
+        font-family: Consolas, monospace;
+        font-size: 9pt;
+      }
+      pre {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 10px 14px;
+        margin: 8px 0;
+        font-family: Consolas, monospace;
+        font-size: 8.5pt;
+        white-space: pre-wrap;
+        word-break: break-all;
+        border-radius: 3px;
+        page-break-inside: avoid;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        font-size: 9pt;
+      }
+      th,
+      td {
+        border: 1px solid #d5dae5;
+        padding: 5px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f5f3ef;
+      }
+      tr {
+        page-break-inside: avoid;
+      }
+      .check li {
+        list-style: none;
+        margin-left: -18px;
+      }
+      .check li::before {
+        content: "☐  ";
+        color: #0b1a33;
+      }
+      footer {
+        margin-top: 36px;
+        padding-top: 10px;
+        border-top: 1px solid #d5dae5;
+        font-size: 8.5pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <div class="eyebrow">Guía paso a paso</div>
+      <h1>Publicar Mood Sense en internet (temporalmente y gratis)</h1>
+      <p>
+        Cómo poner la tienda en una dirección pública para probarla desde cualquier celular o
+        computadora, usando tu cuenta de GitHub, Vercel y Neon. Tiempo estimado: 45 a 60 minutos la
+        primera vez.
+      </p>
+    </header>
+
+    <h2><span class="num">1</span>Por qué no se usa GitHub Pages</h2>
+    <p>
+      <strong>GitHub Pages</strong> solo puede mostrar páginas fijas, como un folleto: archivos que
+      no cambian. Mood Sense es una tienda "viva": tiene base de datos, inicio de sesión, carrito,
+      pedidos y panel de administración. Todo eso necesita un <strong>servidor</strong> que piense y
+      responda, y GitHub Pages no lo tiene. Si se publicara ahí, se vería una página rota o vacía.
+    </p>
+    <p>
+      La alternativa equivalente es <strong>Vercel</strong>: también es gratis, se conecta
+      directamente a tu repositorio de GitHub y publica una dirección del estilo
+      <span class="path">mood-sense.vercel.app</span>. Cada vez que se suban cambios a GitHub, la
+      tienda publicada se actualiza sola. Para la base de datos se usa <strong>Neon</strong>,
+      también gratis.
+    </p>
+    <div class="tip">
+      <strong>Tu código ya está en GitHub</strong> (repositorio
+      <span class="path">joscar39/moodsense-web-store</span>). Puede seguir siendo
+      <strong>privado</strong>: Vercel lo lee igual con tu permiso, y nadie más ve el código.
+    </div>
+
+    <h2><span class="num">2</span>Qué necesitas antes de empezar</h2>
+    <ul>
+      <li>Tu cuenta de <strong>GitHub</strong> (la misma donde está el repositorio).</li>
+      <li>
+        Una computadora con el proyecto funcionando (la copia de WSL), para preparar la base de
+        datos una sola vez.
+      </li>
+      <li>El VPN <strong>apagado</strong> mientras haces el paso 3 (si no, la conexión falla).</li>
+      <li>
+        Los últimos cambios del proyecto subidos a GitHub (pídele a tu desarrollador que haga el
+        "push").
+      </li>
+    </ul>
+
+    <h2><span class="num">3</span>Crear la base de datos en Neon</h2>
+    <ol>
+      <li>
+        Entra a <span class="path">neon.tech</span> y elige <strong>Sign up</strong> →
+        <strong>Continue with GitHub</strong>.
+      </li>
+      <li>
+        Crea un proyecto: nombre <em>moodsense</em>, versión de Postgres 16, región la más cercana a
+        tus clientes (por ejemplo <em>US East</em>).
+      </li>
+      <li>
+        En el panel del proyecto pulsa <strong>Connect</strong>. Activa la opción
+        <strong>Connection pooling</strong> y copia la dirección que aparece (empieza con
+        <span class="path">postgresql://</span> y contiene <span class="path">-pooler</span>).
+        Guárdala: es tu <strong>DATABASE_URL</strong> de producción.
+      </li>
+      <li>
+        Abre la terminal de Ubuntu (WSL) y entra a la carpeta del proyecto:
+        <pre>cd ~/projects/moodsense-web-store</pre>
+      </li>
+      <li>
+        Crea las tablas en Neon (reemplaza lo que está entre comillas por tu dirección de Neon):
+        <pre>
+DATABASE_URL="postgresql://...-pooler...neon.tech/neondb?sslmode=require" npx prisma migrate deploy</pre>
+      </li>
+      <li>
+        Carga los productos de ejemplo y el usuario administrador, eligiendo una contraseña
+        <strong>fuerte</strong> y nueva:
+        <pre>
+DATABASE_URL="postgresql://...neon..." SEED_ADMIN_PASSWORD="UnaClaveLarga-y-Unica-2026" SEED_USER_PASSWORD="OtraClaveLarga-2026" npm run db:seed</pre>
+      </li>
+    </ol>
+    <div class="warn">
+      <strong>Importante:</strong> el sitio publicado será visible para cualquiera que tenga la
+      dirección. Nunca uses las contraseñas de prueba <em>admin1234</em> / <em>cliente1234</em> en
+      la versión publicada. El administrador entra con
+      <span class="path">admin@moodsense.dev</span> y la contraseña que elegiste aquí.
+    </div>
+
+    <h2><span class="num">4</span>Publicar en Vercel</h2>
+    <ol>
+      <li>
+        Entra a <span class="path">vercel.com</span> → <strong>Sign Up</strong> → plan
+        <strong>Hobby</strong> (gratis) → <strong>Continue with GitHub</strong>.
+      </li>
+      <li>
+        Pulsa <strong>Add New… → Project</strong>. Si no ves el repositorio, pulsa
+        <em>Adjust GitHub App Permissions</em> y dale acceso a
+        <span class="path">moodsense-web-store</span>.
+      </li>
+      <li>
+        Pulsa <strong>Import</strong> junto al repositorio. Vercel detecta solo que es un proyecto
+        Next.js: no cambies nada en "Build and Output Settings".
+      </li>
+      <li>
+        Abre <strong>Environment Variables</strong> y agrega una por una las siguientes (nombre a la
+        izquierda, valor a la derecha):
+      </li>
+    </ol>
+    <table>
+      <tr>
+        <th>Nombre</th>
+        <th>Valor</th>
+        <th>Obligatoria</th>
+      </tr>
+      <tr>
+        <td>DATABASE_URL</td>
+        <td>La dirección de Neon del paso 3</td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>AUTH_SECRET</td>
+        <td>
+          Un texto aleatorio NUEVO de al menos 32 caracteres. Puedes generarlo en la terminal con
+          <span class="path">openssl rand -base64 32</span>. No reutilices el de tu computadora.
+        </td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>NEXT_PUBLIC_APP_URL</td>
+        <td>
+          La dirección que te dará Vercel, por ejemplo
+          <span class="path">https://moodsense-web-store.vercel.app</span>. Si aún no la conoces,
+          ponla después del primer deploy (paso 5).
+        </td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>AUTH_URL</td>
+        <td>La misma dirección que NEXT_PUBLIC_APP_URL</td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>NEXT_PUBLIC_CHECKOUT_MODE</td>
+        <td><span class="path">whatsapp</span></td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>WHATSAPP_OPERATOR_PHONE</td>
+        <td>Número de la tienda, solo dígitos, con código de país y sin "+" (ej. 18095550100)</td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>CRON_SECRET</td>
+        <td>Otro texto aleatorio largo (<span class="path">openssl rand -hex 32</span>)</td>
+        <td>Sí</td>
+      </tr>
+      <tr>
+        <td>ORDER_PAYMENT_EXPIRY_HOURS</td>
+        <td><span class="path">48</span></td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>MEILISEARCH_HOST / MEILISEARCH_MASTER_KEY</td>
+        <td>
+          Solo si contratas Meilisearch Cloud (ver sección 6). Sin ellas, la página de búsqueda
+          muestra un aviso de "búsqueda no disponible" y el resto funciona.
+        </td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>BLOB_READ_WRITE_TOKEN</td>
+        <td>Lo agrega Vercel solo si activas Blob (sección 6)</td>
+        <td>No</td>
+      </tr>
+    </table>
+    <ol start="5">
+      <li>
+        Pulsa <strong>Deploy</strong> y espera 2 a 4 minutos. Al terminar verás la dirección pública
+        (por ejemplo <span class="path">moodsense-web-store.vercel.app</span>).
+      </li>
+      <li>
+        Si en el paso 4 no conocías la dirección: ve a
+        <strong>Settings → Environment Variables</strong>, corrige <em>NEXT_PUBLIC_APP_URL</em> y
+        <em>AUTH_URL</em>, y luego en <strong>Deployments</strong> abre el menú (⋯) del último y
+        elige <strong>Redeploy</strong>. Los cambios de variables solo se aplican al volver a
+        publicar.
+      </li>
+    </ol>
+    <div class="tip">
+      <strong>Tarea automática de pedidos vencidos:</strong> Vercel ejecuta una vez al día la
+      limpieza que cancela los pedidos no pagados a tiempo (el plan gratuito permite una vez al
+      día). Además, la limpieza corre cada vez que un administrador abre la lista de pedidos, así
+      que nada queda colgado.
+    </div>
+
+    <h2><span class="num">5</span>Probar la tienda publicada</h2>
+    <ul class="check">
+      <li>La portada, el listado de productos y la ficha de un producto cargan con imágenes.</li>
+      <li>Puedes crear una cuenta nueva e iniciar sesión.</li>
+      <li>
+        Haces un pedido de prueba: carrito → checkout → aparece la confirmación con el botón de
+        WhatsApp.
+      </li>
+      <li>
+        Entras a <span class="path">/admin</span> con el administrador, ves el pedido y lo marcas
+        como pagado o cancelado.
+      </li>
+      <li>
+        Abres <span class="path">/sitemap.xml</span> y <span class="path">/robots.txt</span> y
+        responden.
+      </li>
+    </ul>
+    <p>Para compartirla, basta enviar la dirección de Vercel. Funciona en cualquier celular.</p>
+
+    <h2><span class="num">6</span>Extras opcionales</h2>
+    <h3>Subir imágenes desde el panel (Vercel Blob)</h3>
+    <ol>
+      <li>
+        En tu proyecto de Vercel: <strong>Storage → Create Database → Blob</strong> →
+        <strong>Connect</strong> al proyecto.
+      </li>
+      <li>Vercel agrega solo <em>BLOB_READ_WRITE_TOKEN</em>. Haz <strong>Redeploy</strong>.</li>
+    </ol>
+    <h3>Buscador inteligente (Meilisearch Cloud)</h3>
+    <ol>
+      <li>
+        Crea una cuenta en <span class="path">cloud.meilisearch.com</span> (tiene período de prueba;
+        luego es de pago).
+      </li>
+      <li>
+        Copia el <em>host</em> y la <em>master key</em> a Vercel como MEILISEARCH_HOST y
+        MEILISEARCH_MASTER_KEY.
+      </li>
+      <li>
+        Carga los productos en el buscador desde WSL:
+        <pre>
+MEILISEARCH_HOST="https://..." MEILISEARCH_MASTER_KEY="..." DATABASE_URL="postgresql://...neon..." npm run search:sync</pre>
+      </li>
+    </ol>
+    <h3>Aviso automático de pedidos por WhatsApp</h3>
+    <p>
+      Con solo el número, el aviso de cada pedido queda escrito en los registros de Vercel
+      (<strong>Logs</strong>) y el pedido aparece en el panel. Para recibirlo como mensaje
+      automático hace falta la WhatsApp Business Cloud API de Meta (variables
+      WHATSAPP_CLOUD_API_TOKEN y WHATSAPP_CLOUD_PHONE_NUMBER_ID, explicadas en el archivo
+      <span class="path">.env.example</span>).
+    </p>
+
+    <h2><span class="num">7</span>Apagar la publicación cuando termines</h2>
+    <p>Como es temporal, cuando ya no la necesites:</p>
+    <ol>
+      <li>
+        <strong>Vercel:</strong> proyecto → <strong>Settings → General</strong> → al final,
+        <strong>Delete Project</strong>. La dirección deja de funcionar. (Si solo quieres ocultarla
+        sin borrarla: <strong>Settings → Deployment Protection</strong> → activa
+        <em>Vercel Authentication</em> para todo el sitio; así solo tú, con tu cuenta de Vercel,
+        podrás verla.)
+      </li>
+      <li>
+        <strong>Neon:</strong> proyecto → <strong>Settings</strong> →
+        <strong>Delete project</strong>. Se borran los datos de prueba y los pedidos que se hayan
+        hecho.
+      </li>
+      <li>El código en GitHub y tu copia local no se tocan.</li>
+    </ol>
+    <div class="warn">
+      <strong>Datos reales:</strong> si personas reales hacen pedidos en la versión publicada, sus
+      nombres, teléfonos y direcciones quedan en Neon. Bórralos (paso 2) cuando termines la prueba,
+      y no publiques la dirección en redes si todavía es solo una prueba.
+    </div>
+
+    <h2><span class="num">8</span>Problemas frecuentes</h2>
+    <table>
+      <tr>
+        <th>Qué ves</th>
+        <th>Qué hacer</th>
+      </tr>
+      <tr>
+        <td>El deploy falla con un error de base de datos</td>
+        <td>
+          Revisa que DATABASE_URL sea la de Neon con <em>-pooler</em> y que hiciste el paso 3.
+        </td>
+      </tr>
+      <tr>
+        <td>No puedo iniciar sesión / me devuelve al login</td>
+        <td>
+          Revisa que AUTH_SECRET exista y que AUTH_URL sea exactamente la dirección pública con
+          <em>https://</em>. Luego Redeploy.
+        </td>
+      </tr>
+      <tr>
+        <td>La tienda abre pero sin productos</td>
+        <td>Falta el seed del paso 3.6.</td>
+      </tr>
+      <tr>
+        <td>"Búsqueda no disponible"</td>
+        <td>Es normal sin Meilisearch (sección 6).</td>
+      </tr>
+      <tr>
+        <td>Cambié una variable y no se nota</td>
+        <td>Siempre hace falta <strong>Redeploy</strong> después de cambiar variables.</td>
+      </tr>
+    </table>
+
+    <footer>
+      <span>Mood Sense · Wear your vibe. Make the match.</span
+      ><span>Publicar en internet · v1 · nov 2026</span>
+    </footer>
+  </body>
+</html>

@@ -9,14 +9,17 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/format/price";
 
+/** Categoría raíz con sus subcategorías, tal como se lista en el panel de filtros. */
 export type FilterCategory = {
   slug: string;
   name: string;
   children: { slug: string; name: string; productCount: number }[];
 };
 
+/** Marca con su cantidad de productos activos. */
 export type FilterBrand = { slug: string; name: string; productCount: number };
 
+// Opciones del filtro de género (valor del enum en la URL → etiqueta visible).
 const GENDER_OPTIONS = [
   { value: "MEN", label: "Hombre" },
   { value: "WOMEN", label: "Mujer" },
@@ -24,8 +27,13 @@ const GENDER_OPTIONS = [
 ] as const;
 
 /**
- * Filters live in the URL so the PLP stays a Server Component: every change
- * pushes new search params and the server re-renders the grid.
+ * Panel de filtros del catálogo (categoría, marca, género, precio y rebajas).
+ * Los filtros viven en la URL para que el PLP siga siendo Server Component: cada
+ * cambio empuja nuevos search params y el servidor vuelve a renderizar la grilla.
+ *
+ * @example
+ * <FiltersPanel categories={categories} brands={brands} />
+ * // Elegir "Mujer" → /products?gender=WOMEN
  */
 export function FiltersPanel({
   categories,
@@ -40,16 +48,19 @@ export function FiltersPanel({
 
   const current = (key: string) => searchParams.get(key);
 
+  // Aplica cambios a la URL (null o "" borra la clave) y navega sin mover el scroll.
+  // Ej.: setParams({ brand: "atlas-supply", onSale: null })
   const setParams = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
     for (const [key, value] of Object.entries(updates)) {
       if (value === null || value === "") params.delete(key);
       else params.set(key, value);
     }
-    params.delete("page"); // any filter change restarts pagination
+    params.delete("page"); // cualquier cambio de filtro vuelve a la página 1
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  // Estilo de los filtros tipo enlace: subrayado cuando están activos.
   const linkClass = (active: boolean) =>
     `block py-1 text-sm transition-colors ${
       active
@@ -150,6 +161,7 @@ export function FiltersPanel({
           onSubmit={(event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
+            // Convierte los dólares escritos a centavos (la API trabaja en centavos); vacío → sin filtro.
             const toCents = (raw: FormDataEntryValue | null) => {
               const dollars = Number(raw);
               return raw && Number.isFinite(dollars) && dollars > 0

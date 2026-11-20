@@ -8,10 +8,18 @@ import { FieldError } from "@/components/auth/field-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { readApiError } from "@/lib/api/client-errors";
 import { passwordChangeSchema } from "@/lib/validators/account";
 
 import type { PasswordChangeInput } from "@/lib/validators/account";
 
+/**
+ * Formulario para cambiar la contraseña (pide la actual y la nueva) contra
+ * POST /api/account/password; avisa con un toast y limpia los campos al terminar.
+ *
+ * @example
+ * <PasswordForm />
+ */
 export function PasswordForm() {
   const {
     register,
@@ -27,9 +35,7 @@ export function PasswordForm() {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const body: unknown = await response.json();
-      const message = (body as { error?: { message?: string } }).error?.message;
-      toast.error(message ?? "No se pudo cambiar la contraseña.");
+      toast.error((await readApiError(response)) ?? "No se pudo cambiar la contraseña.");
       return;
     }
     toast.success("Contraseña actualizada.");

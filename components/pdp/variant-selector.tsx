@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/cart/cart-store";
 import { formatPrice } from "@/lib/format/price";
 
-export type PdpVariant = {
+/** Variante vendible (talla/color) con su stock; `priceCents` null = usa el precio base. */
+type PdpVariant = {
   id: string;
   sku: string;
   size: string | null;
@@ -17,16 +18,29 @@ export type PdpVariant = {
   stock: number;
 };
 
-export type PdpProductInfo = {
+/** Datos del producto que se copian al carrito al añadirlo. */
+type PdpProductInfo = {
   slug: string;
   name: string;
   brandName: string;
   imageUrl: string | null;
 };
 
+// Con esta cantidad de unidades o menos se muestra el aviso de "¡Solo N unidades!".
 const LOW_STOCK_THRESHOLD = 5;
 
-/** Size/color picker. Variant price overrides the product base price. */
+/**
+ * Selector de color y talla de la ficha de producto, con precio, SKU, aviso de stock
+ * y botón "Añadir al carrito". El precio de la variante, si existe, reemplaza al precio base.
+ *
+ * @example
+ * <VariantSelector
+ *   product={{ slug: "cloud-heavy-hoodie", name: "Cloud Heavy Hoodie", brandName: "Atlas Supply", imageUrl: null }}
+ *   variants={[{ id: "v1", sku: "MS-ATL-006-M", size: "M", color: "Crema", priceCents: null, stock: 3 }]}
+ *   basePriceCents={8900}
+ *   compareAtPriceCents={null}
+ * />
+ */
 export function VariantSelector({
   product,
   variants,

@@ -1,5 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Placeholder animado con la forma de la grilla de productos, para estados de carga.
+ *
+ * @example
+ * <ProductGridSkeleton count={12} />
+ */
 export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 lg:grid-cols-3 xl:grid-cols-4">

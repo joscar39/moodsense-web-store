@@ -1,11 +1,14 @@
 import { ApiError } from "@/lib/api/handle-api-error";
 import { prisma } from "@/lib/db/prisma";
 import { reserveStock } from "@/lib/inventory/stock";
-import { buildOrderMessage, getWhatsappNotifier } from "@/lib/notifications/whatsapp-notifier";
+import { buildOrderMessage, notifyOperator } from "@/lib/notifications/whatsapp-notifier";
 
-import { validateCart } from "./validate-cart";
+import { loadValidatedCart, toOrderItems } from "./validate-cart";
 
 import type { ManualCheckoutInput } from "@/lib/validators/checkout";
+
+/** Máximo de pedidos pendientes de pago por teléfono en la última hora (anti-abuso). */
+const MAX_PENDING_ORDERS_PER_PHONE_PER_HOUR = 3;
 
 /**
  * Flujo de pago manual (WhatsApp): crea el pedido en PENDING_PAYMENT y
@@ -16,37 +19,38 @@ import type { ManualCheckoutInput } from "@/lib/validators/checkout";
  *
  * La notificación al operador se envía DESPUÉS del commit y nunca bloquea ni
  * revierte el pedido (si falla, queda loggeada para reintento manual).
+ *
+ * Anti-abuso: como el pedido aparta stock sin pagar, un mismo teléfono no puede
+ * tener más de 3 pedidos pendientes creados en la última hora (429). Así nadie
+ * puede vaciar el inventario con pedidos falsos.
+ *
+ * @example
+ * const { orderId } = await createManualOrder(
+ *   { items: [{ variantId: "v1", quantity: 1 }], customer: { name: "Ana", phone: "+18095550100" },
+ *     shipping: { line1: "Calle 1", city: "Santo Domingo", country: "DO" } },
+ *   null // invitado; o { id, email } si inició sesión
+ * );
  */
 export async function createManualOrder(
   input: ManualCheckoutInput,
   user: { id: string; email: string } | null
 ) {
-  const variants = await prisma.productVariant.findMany({
-    where: { id: { in: input.items.map((item) => item.variantId) } },
-    select: {
-      id: true,
-      sku: true,
-      size: true,
-      color: true,
-      priceCents: true,
-      stock: true,
-      product: { select: { name: true, slug: true, isActive: true, priceCents: true } },
+  const recentPendingOrders = await prisma.order.count({
+    where: {
+      shippingPhone: input.customer.phone,
+      status: "PENDING_PAYMENT",
+      createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
     },
   });
-
-  const { lines, issues, subtotalCents } = validateCart(input.items, variants);
-
-  if (issues.length > 0) {
-    const stockOnly = issues.every((issue) => issue.code === "INSUFFICIENT_STOCK");
+  if (recentPendingOrders >= MAX_PENDING_ORDERS_PER_PHONE_PER_HOUR) {
     throw new ApiError(
-      stockOnly ? "INSUFFICIENT_STOCK" : "CART_INVALID",
-      stockOnly
-        ? "No hay stock suficiente para algunos productos del carrito."
-        : "Algunos productos del carrito ya no están disponibles.",
-      stockOnly ? 409 : 400,
-      issues
+      "TOO_MANY_ORDERS",
+      "Ya tienes varios pedidos pendientes de pago. Escríbenos por WhatsApp para completarlos.",
+      429
     );
   }
+
+  const { lines, subtotalCents } = await loadValidatedCart(input.items);
 
   const order = await prisma.$transaction(async (tx) => {
     // Reserva atómica: si otra transacción ganó la última unidad, esto lanza
@@ -73,16 +77,7 @@ export async function createManualOrder(
         shippingState: input.shipping.state ?? null,
         shippingPostalCode: input.shipping.postalCode ?? null,
         shippingCountry: input.shipping.country,
-        items: {
-          create: lines.map((line) => ({
-            variantId: line.variantId,
-            productName: line.productName,
-            variantLabel: line.variantLabel,
-            sku: line.sku,
-            unitPriceCents: line.unitPriceCents,
-            quantity: line.quantity,
-          })),
-        },
+        items: { create: toOrderItems(lines) },
       },
       select: { id: true, totalCents: true },
     });
@@ -113,7 +108,7 @@ export async function createManualOrder(
   });
 
   try {
-    await getWhatsappNotifier().sendToOperator(message);
+    await notifyOperator(message, order.id);
   } catch (error) {
     console.error(`[whatsapp] fallo al notificar el pedido ${order.id}:`, error);
   }

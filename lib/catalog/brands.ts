@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/db/prisma";
 
-/** All brands with their active product count, alphabetical. */
+/**
+ * Todas las marcas en orden alfabético con su número de productos activos.
+ *
+ * @example
+ * const brands = await listBrands(); // [{ id, name, slug, productCount: 4 }, ...]
+ */
 export async function listBrands() {
   const brands = await prisma.brand.findMany({
     orderBy: { name: "asc" },

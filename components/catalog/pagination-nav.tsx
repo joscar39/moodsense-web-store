@@ -2,7 +2,14 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
-/** Link-based pagination that preserves the current filters. */
+/**
+ * Paginación por enlaces (Anterior / Siguiente) que conserva los filtros actuales.
+ * No renderiza nada si hay una sola página.
+ *
+ * @example
+ * <PaginationNav page={2} totalPages={5} basePath="/products" searchParams={{ brand: "atlas-supply" }} />
+ * // "Siguiente" → /products?brand=atlas-supply&page=3
+ */
 export function PaginationNav({
   page,
   totalPages,
@@ -16,6 +23,7 @@ export function PaginationNav({
 }) {
   if (totalPages <= 1) return null;
 
+  // URL de una página concreta; la página 1 omite `page` para dejar la URL limpia.
   const hrefFor = (target: number) => {
     const params = new URLSearchParams(searchParams);
     if (target === 1) params.delete("page");

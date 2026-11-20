@@ -1,43 +1,20 @@
 import "dotenv/config";
 
-import { getMeiliClient } from "@/lib/search/client";
-import { PRODUCTS_INDEX, syncProductsIndex } from "@/lib/search/products-index";
-
-const SEARCH_KEY_NAME = "moodsense-search";
+import { syncProductsIndex } from "@/lib/search/products-index";
 
 /**
- * Ensures a public search-only API key exists (safe for the browser, scoped
- * to the products index). Prints it on first creation so it can be copied to
- * NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY in .env.
+ * Script de `npm run search:sync`: reindexa por completo el índice `products`
+ * de Meilisearch (settings + productos activos, borra los inactivos).
+ *
+ * @example
+ * // npm run search:sync
+ * // → Syncing Meilisearch products index…
+ * //   ✓ 20 products indexed, 0 removed
  */
-async function ensureSearchKey() {
-  const client = getMeiliClient();
-  const { results } = await client.getKeys({ limit: 100 });
-  const existing = results.find((key) => key.name === SEARCH_KEY_NAME);
-
-  if (existing) {
-    console.log(`✓ search key "${SEARCH_KEY_NAME}" already exists (uid ${existing.uid})`);
-    return;
-  }
-
-  const created = await client.createKey({
-    name: SEARCH_KEY_NAME,
-    description: "Public search-only key for the storefront (products index).",
-    actions: ["search"],
-    indexes: [PRODUCTS_INDEX],
-    expiresAt: null,
-  });
-
-  console.log(`✓ created search-only key "${SEARCH_KEY_NAME}"`);
-  console.log("  Copy it to NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY in your .env:");
-  console.log(`  ${created.key}`);
-}
-
 async function main() {
   console.log("→ Syncing Meilisearch products index…");
   const { indexed, removed } = await syncProductsIndex();
   console.log(`  ✓ ${indexed} products indexed, ${removed} removed`);
-  await ensureSearchKey();
   console.log("✓ Done.");
 }
 

@@ -3,12 +3,22 @@ const usd = new Intl.NumberFormat("en-US", {
   currency: "USD",
 });
 
-/** Formats integer cents for display ("$39.00"). Presentation layer only. */
+/**
+ * Formatea centavos enteros como precio en USD para mostrar. Solo capa de presentación.
+ *
+ * @example
+ * formatPrice(3900); // "$39.00"
+ */
 export function formatPrice(cents: number): string {
   return usd.format(cents / 100);
 }
 
-/** Discount percentage for sale badges (e.g. 4200 → 3500 = 17). */
+/**
+ * Porcentaje de descuento redondeado para los badges de rebaja.
+ *
+ * @example
+ * discountPercent(3500, 4200); // 17
+ */
 export function discountPercent(priceCents: number, compareAtPriceCents: number): number {
   return Math.round((1 - priceCents / compareAtPriceCents) * 100);
 }

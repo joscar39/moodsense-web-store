@@ -1,17 +1,7 @@
 import { Badge } from "@/components/ui/badge";
+import { ORDER_STATUS_LABELS } from "@/lib/admin/order-status";
 
 import type { OrderStatus } from "@/lib/generated/prisma/enums";
-
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: "Pendiente",
-  PENDING_PAYMENT: "Pago pendiente",
-  PAID: "Pagado",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-  EXPIRED: "Expirado",
-  REFUNDED: "Reembolsado",
-};
 
 const STATUS_CLASSES: Partial<Record<OrderStatus, string>> = {
   PAID: "bg-navy text-gold",
@@ -22,13 +12,20 @@ const STATUS_CLASSES: Partial<Record<OrderStatus, string>> = {
   REFUNDED: "bg-secondary text-muted-foreground",
 };
 
+/**
+ * Etiqueta visual del estado de un pedido (navy/dorado para pagado/entregado,
+ * gris para estados terminales). Se usa en la cuenta del cliente y en el admin.
+ *
+ * @example
+ * <OrderStatusBadge status="PAID" />
+ */
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   return (
     <Badge
       className={`rounded-none text-[10px] tracking-[0.15em] uppercase ${STATUS_CLASSES[status] ?? ""}`}
       variant={STATUS_CLASSES[status] ? undefined : "secondary"}
     >
-      {STATUS_LABELS[status]}
+      {ORDER_STATUS_LABELS[status]}
     </Badge>
   );
 }

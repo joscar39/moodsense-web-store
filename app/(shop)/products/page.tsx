@@ -23,10 +23,17 @@ export const metadata: Metadata = {
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+/**
+ * Página /products (PLP): catálogo con filtros, orden y paginación en la URL;
+ * el grid se transmite con Suspense.
+ *
+ * @example
+ * // GET /products?category=ropa&sort=price-asc&page=2
+ */
 export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
   const raw = firstSearchParamValues(await searchParams);
   const parsed = productListQuerySchema.safeParse(raw);
-  // Invalid params fall back to the default listing instead of erroring.
+  // Parámetros inválidos: se muestra el listado por defecto en vez de un error.
   const query = parsed.success ? parsed.data : productListQuerySchema.parse({});
 
   const [categories, brands] = await Promise.all([listCategoryTree(), listBrands()]);
@@ -58,6 +65,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
   );
 }
 
+/**
+ * Grid paginado de resultados del PLP (Server Component dentro de Suspense).
+ *
+ * @example
+ * <ProductResults query={query} rawParams={raw} />
+ */
 async function ProductResults({
   query,
   rawParams,

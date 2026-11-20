@@ -4,10 +4,13 @@ import { decrementStockBestEffort, stockLinesFromOrderItems } from "@/lib/invent
 import type Stripe from "stripe";
 
 /**
- * Marks the order behind a completed Checkout Session as PAID, copies the
- * definitive email + shipping address snapshot from Stripe and decrements
- * stock — all in one transaction. Idempotent: a non-PENDING order is skipped,
- * so webhook retries are safe.
+ * Webhook `checkout.session.completed`: marca el pedido como PAID, copia de
+ * Stripe el email y la dirección de envío definitivos y descuenta stock, todo
+ * en una transacción. Idempotente: un pedido que ya no está PENDING se salta,
+ * así los reintentos de Stripe son seguros.
+ *
+ * @example
+ * await markOrderPaid(event.data.object); // { status: "fulfilled" | "already-processed" | "ignored" }
  */
 export async function markOrderPaid(session: Stripe.Checkout.Session) {
   const order = await findOrderForSession(session);
@@ -43,14 +46,19 @@ export async function markOrderPaid(session: Stripe.Checkout.Session) {
       },
     });
 
-    // Payment already happened; never block fulfillment (underflow is logged).
+    // El pago ya ocurrió: nunca bloquear el cumplimiento (el underflow se loggea).
     await decrementStockBestEffort(tx, stockLinesFromOrderItems(order.items), order.id);
   });
 
   return { status: "fulfilled" as const };
 }
 
-/** Cancels the PENDING order of an expired Checkout Session. Idempotent. */
+/**
+ * Webhook `checkout.session.expired`: cancela el pedido PENDING de esa sesión. Idempotente.
+ *
+ * @example
+ * await cancelExpiredOrder(event.data.object); // { status: "cancelled" | "ignored" }
+ */
 export async function cancelExpiredOrder(session: Stripe.Checkout.Session) {
   const order = await findOrderForSession(session);
   if (!order || order.status !== "PENDING") {
@@ -60,6 +68,7 @@ export async function cancelExpiredOrder(session: Stripe.Checkout.Session) {
   return { status: "cancelled" as const };
 }
 
+/** Busca el pedido de una sesión de Stripe por `metadata.orderId` (o, si falta, por id de sesión). */
 function findOrderForSession(session: Stripe.Checkout.Session) {
   const orderId = session.metadata?.orderId;
   return prisma.order.findFirst({

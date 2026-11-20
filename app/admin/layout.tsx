@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: { default: "Admin", template: "%s · Admin Mood Sense" },
 };
 
+/**
+ * Layout de /admin/**: verifica rol ADMIN en el servidor y pinta la cabecera
+ * del panel con la navegación lateral.
+ *
+ * @example
+ * // Envuelve /admin, /admin/products y /admin/orders.
+ */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdminPage();
 

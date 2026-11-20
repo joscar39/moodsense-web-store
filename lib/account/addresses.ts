@@ -16,6 +16,12 @@ const addressSelect = {
   isDefault: true,
 };
 
+/**
+ * Direcciones del usuario, la principal primero y luego las más recientes.
+ *
+ * @example
+ * const addresses = await listAddresses(session.user.id);
+ */
 export function listAddresses(userId: string) {
   return prisma.address.findMany({
     where: { userId },
@@ -24,9 +30,16 @@ export function listAddresses(userId: string) {
   });
 }
 
+/**
+ * Crea una dirección del usuario. La primera siempre es la principal; si llega
+ * `isDefault`, le quita esa marca a las demás.
+ *
+ * @example
+ * await createAddress(userId, addressSchema.parse(body));
+ */
 export async function createAddress(userId: string, input: AddressInput) {
   const count = await prisma.address.count({ where: { userId } });
-  // The first address is always the default one.
+  // La primera dirección siempre es la principal.
   const isDefault = count === 0 || input.isDefault;
 
   return prisma.$transaction(async (tx) => {
@@ -40,6 +53,13 @@ export async function createAddress(userId: string, input: AddressInput) {
   });
 }
 
+/**
+ * Actualiza una dirección propia (404 si es ajena o no existe); marcarla como
+ * principal le quita la marca a las demás.
+ *
+ * @example
+ * await updateAddress(userId, addressId, { ...input, isDefault: true });
+ */
 export async function updateAddress(userId: string, addressId: string, input: AddressInput) {
   await assertOwnership(userId, addressId);
 
@@ -55,12 +75,19 @@ export async function updateAddress(userId: string, addressId: string, input: Ad
   });
 }
 
+/**
+ * Borra una dirección propia (404 si es ajena). Si era la principal, promueve
+ * la más reciente de las restantes para que siempre haya exactamente una.
+ *
+ * @example
+ * await deleteAddress(userId, addressId);
+ */
 export async function deleteAddress(userId: string, addressId: string) {
   const address = await assertOwnership(userId, addressId);
 
   await prisma.$transaction(async (tx) => {
     await tx.address.delete({ where: { id: addressId } });
-    // Keep exactly one default: promote the newest remaining address.
+    // Mantener exactamente una principal: se promueve la más reciente.
     if (address.isDefault) {
       const next = await tx.address.findFirst({
         where: { userId },
@@ -74,7 +101,13 @@ export async function deleteAddress(userId: string, addressId: string) {
   });
 }
 
-/** Addresses are strictly scoped to their owner; anything else is a 404. */
+/**
+ * Comprueba que la dirección pertenece al usuario; si no, lanza 404 (no 403,
+ * para no revelar que existe).
+ *
+ * @example
+ * const { isDefault } = await assertOwnership(userId, addressId);
+ */
 async function assertOwnership(userId: string, addressId: string) {
   const address = await prisma.address.findFirst({
     where: { id: addressId, userId },

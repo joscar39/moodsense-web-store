@@ -1,21 +1,20 @@
-import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
-import { deleteProduct, updateProduct } from "@/lib/admin/products";
+import { deleteProduct, revalidateCatalog, updateProduct } from "@/lib/admin/products";
 import { handleApiError } from "@/lib/api/handle-api-error";
 import { requireAdmin } from "@/lib/auth/require-user";
 import { adminProductSchema } from "@/lib/validators/admin";
 
 type Context = { params: Promise<{ id: string }> };
 
-function revalidateCatalog(slugs: (string | undefined)[]) {
-  revalidatePath("/");
-  revalidatePath("/products");
-  for (const slug of slugs) {
-    if (slug) revalidatePath(`/products/${slug}`);
-  }
-}
-
+/**
+ * PATCH /api/admin/products/[id] (solo ADMIN): reemplaza los datos del producto
+ * (reconciliando variantes) y revalida el slug nuevo y el anterior.
+ *
+ * @example
+ * // PATCH /api/admin/products/abc { ...producto completo }
+ * // 200 { data: { id, slug, previousSlug } } · 400 · 403 · 404 · 409
+ */
 export async function PATCH(request: Request, context: Context) {
   try {
     await requireAdmin();
@@ -31,6 +30,13 @@ export async function PATCH(request: Request, context: Context) {
   }
 }
 
+/**
+ * DELETE /api/admin/products/[id] (solo ADMIN): borra el producto y revalida el catálogo.
+ *
+ * @example
+ * // DELETE /api/admin/products/abc
+ * // 200 { data: { deleted: true } } · 403 · 404
+ */
 export async function DELETE(_request: Request, context: Context) {
   try {
     await requireAdmin();

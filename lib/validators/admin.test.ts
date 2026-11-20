@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { adminProductSchema } from "./admin";
+import { adminProductFormSchema, adminProductSchema, toAdminProductPayload } from "./admin";
 
 const validProduct = {
   name: "Test Tee",
@@ -74,5 +74,54 @@ describe("adminProductSchema", () => {
       variants: [{ sku: "MS-TST-001-M", size: "M", stock: "-1" }],
     };
     expect(adminProductSchema.safeParse(bad).success).toBe(false);
+  });
+});
+
+const validForm = {
+  name: "Test Tee",
+  slug: "test-tee",
+  description: "Una camiseta de prueba con descripción suficiente.",
+  priceUsd: "39.99",
+  brandId: "brand1",
+  categoryId: "cat1",
+  variants: [
+    { sku: "MS-TST-001-M", size: "M", stock: "5", priceUsd: "" },
+    { sku: "MS-TST-001-L", size: "L", stock: "3", priceUsd: "45.5" },
+  ],
+};
+
+describe("adminProductFormSchema", () => {
+  it("rejects duplicated size/color combinations (same rule as the API)", () => {
+    const dup = {
+      ...validForm,
+      variants: [
+        { sku: "MS-TST-001-M", size: "M", color: "Negro", stock: "1" },
+        { sku: "MS-TST-002-M", size: "M", color: "Negro", stock: "1" },
+      ],
+    };
+    expect(adminProductFormSchema.safeParse(dup).success).toBe(false);
+  });
+
+  it("rejects compareAt lower than or equal to the price", () => {
+    expect(
+      adminProductFormSchema.safeParse({ ...validForm, compareAtPriceUsd: "39.99" }).success
+    ).toBe(false);
+  });
+});
+
+describe("toAdminProductPayload", () => {
+  it("converts dollars to integer cents and keeps the rest of the fields", () => {
+    const payload = toAdminProductPayload(
+      adminProductFormSchema.parse({ ...validForm, compareAtPriceUsd: "59.9" })
+    );
+    expect(payload.priceCents).toBe(3999);
+    expect(payload.compareAtPriceCents).toBe(5990);
+    expect(payload.variants[0].priceCents).toBeUndefined();
+    expect(payload.variants[1].priceCents).toBe(4550);
+    expect(payload.variants[1]).not.toHaveProperty("priceUsd");
+    expect(payload).not.toHaveProperty("priceUsd");
+    expect(payload.slug).toBe("test-tee");
+    // The converted payload must pass the API schema unchanged.
+    expect(adminProductSchema.safeParse(payload).success).toBe(true);
   });
 });

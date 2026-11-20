@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button";
 import { MobileNav } from "./mobile-nav";
 import { SearchForm } from "./search-form";
 
+/** Enlace de navegación (texto visible + destino); lo comparten header, footer y menú móvil. */
 export type NavLink = { label: string; href: string };
 
+/**
+ * Header fijo de la tienda: logo, navegación por categorías, buscador, acceso a la
+ * cuenta y carrito. En móvil el menú pasa a `MobileNav` y el buscador baja a una segunda fila.
+ *
+ * @example
+ * <SiteHeader navLinks={[{ label: "Calzado", href: "/products?category=calzado" }]} />
+ */
 export function SiteHeader({ navLinks }: { navLinks: NavLink[] }) {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">

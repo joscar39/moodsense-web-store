@@ -8,6 +8,13 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 
+/**
+ * Página /account: edición del nombre y cambio de contraseña (oculto para
+ * cuentas que solo usan Google).
+ *
+ * @example
+ * // GET /account → formularios de perfil y contraseña
+ */
 export default async function ProfilePage() {
   const session = await auth();
   const user = await prisma.user.findUniqueOrThrow({

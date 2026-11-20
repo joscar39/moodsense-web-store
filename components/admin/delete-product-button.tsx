@@ -7,6 +7,12 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+/**
+ * Botón de papelera que borra un producto tras confirmar y refresca la tabla.
+ *
+ * @example
+ * <DeleteProductButton id={product.id} name={product.name} />
+ */
 export function DeleteProductButton({ id, name }: { id: string; name: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

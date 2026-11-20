@@ -4,6 +4,12 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Carrito" };
 
+/**
+ * Página /cart: encabezado + vista del carrito (que vive en el navegador).
+ *
+ * @example
+ * // URL: /cart
+ */
 export default function CartPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">

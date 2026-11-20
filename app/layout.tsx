@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-// Self-hosted variable fonts (app/fonts/, latin subset): no build-time
-// network dependency on Google Fonts (builds hang/fail behind VPNs/firewalls).
+// Fuentes variables self-hosted (app/fonts/, subset latin): el build no depende de
+// la red para bajar Google Fonts (se colgaba/fallaba detrás de VPNs/firewalls).
 const sans = localFont({
   src: "./fonts/archivo-variable.woff2",
   weight: "100 900",
@@ -27,6 +27,7 @@ const mono = localFont({
   variable: "--font-geist-mono",
 });
 
+/** Metadatos SEO globales (título con plantilla, descripción, Open Graph) que heredan todas las páginas. */
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
@@ -45,12 +46,21 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
+/** Viewport móvil y color de la barra del navegador (crema de marca). */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#F5F3EF",
 };
 
+/**
+ * Layout raíz de toda la app: define `<html lang="es">`, carga las fuentes de marca
+ * como variables CSS y monta el contenedor global de toasts (avisos emergentes).
+ *
+ * @example
+ * // Next.js lo aplica solo a todas las rutas; envuelve a app/(shop)/layout.tsx,
+ * // app/admin/layout.tsx, etc. No se importa a mano.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

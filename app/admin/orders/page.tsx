@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
+import { ORDER_STATUS_LABELS } from "@/lib/admin/order-status";
 import { listAdminOrders } from "@/lib/admin/orders";
 import { expireStaleManualOrders } from "@/lib/checkout/expire-orders";
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
@@ -16,18 +17,21 @@ const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "medium", timeS
 
 const FILTERS: { value: OrderStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "Todos" },
-  { value: "PENDING_PAYMENT", label: "Pago pendiente" },
-  { value: "PAID", label: "Pagados" },
-  { value: "SHIPPED", label: "Enviados" },
-  { value: "DELIVERED", label: "Entregados" },
-  { value: "PENDING", label: "Pendientes (Stripe)" },
-  { value: "CANCELLED", label: "Cancelados" },
-  { value: "EXPIRED", label: "Expirados" },
-  { value: "REFUNDED", label: "Reembolsados" },
+  ...Object.values(OrderStatus).map((status) => ({
+    value: status,
+    label: ORDER_STATUS_LABELS[status],
+  })),
 ];
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+/**
+ * Página /admin/orders: lista de pedidos con chips de filtro por estado
+ * (`?status=PAID`). Antes de listar ejecuta el barrido de pedidos vencidos.
+ *
+ * @example
+ * // GET /admin/orders?status=PENDING_PAYMENT → pedidos esperando pago
+ */
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdminPage();
   // Barrido oportunista: expira PENDING_PAYMENT vencidos y libera su stock.

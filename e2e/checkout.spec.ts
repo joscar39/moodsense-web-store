@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("checkout manual (WhatsApp)", () => {
+  // Compra completa: elegir talla, añadir al carrito, completar datos de envío y ver la
+  // confirmación con el pedido en "Pago pendiente" y el stock apartado.
   test("PDP → carrito → checkout → pedido PENDING_PAYMENT con stock reservado", async ({
     page,
   }) => {
@@ -34,6 +36,7 @@ test.describe("checkout manual (WhatsApp)", () => {
     await expect(page.getByText("Tu carrito está vacío.")).toBeVisible();
   });
 
+  // El carrito no deja sumar más unidades de las que hay en stock.
   test("el stock del carrito se limita a lo disponible", async ({ page }) => {
     await page.goto("/products/atlas-6-panel-cap"); // talla única
     await page.getByRole("button", { name: "Añadir al carrito" }).click();

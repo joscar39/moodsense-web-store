@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mood Sense — Fases del proyecto</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 20mm 18mm;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 10.5pt;
+        line-height: 1.55;
+      }
+      header.cover {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 42px 40px;
+        margin-bottom: 30px;
+      }
+      header.cover .eyebrow {
+        font-size: 9pt;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #c9a876;
+        margin-bottom: 12px;
+      }
+      header.cover h1 {
+        font-family: Georgia, serif;
+        font-size: 26pt;
+        font-weight: 500;
+      }
+      header.cover p {
+        margin-top: 10px;
+        color: rgba(245, 243, 239, 0.85);
+        max-width: 36em;
+      }
+      h2 {
+        font-family: Georgia, serif;
+        font-size: 16pt;
+        font-weight: 500;
+        margin: 30px 0 10px;
+        padding: 8px 0 6px;
+        border-bottom: 2px solid #0b1a33;
+        page-break-after: avoid;
+      }
+      h2 .num {
+        color: #c9a876;
+        margin-right: 8px;
+      }
+      h3 {
+        font-size: 11pt;
+        margin: 16px 0 6px;
+        color: #0b1a33;
+        page-break-after: avoid;
+      }
+      p {
+        margin: 6px 0;
+      }
+      ol,
+      ul {
+        margin: 6px 0 10px 22px;
+      }
+      li {
+        margin: 3px 0;
+      }
+      .tip {
+        background: #f5f3ef;
+        border-left: 4px solid #c9a876;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .warn {
+        background: #fdf2f2;
+        border-left: 4px solid #c0392b;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        font-size: 9.5pt;
+      }
+      th,
+      td {
+        border: 1px solid #d5dae5;
+        padding: 6px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f5f3ef;
+      }
+      tr {
+        page-break-inside: avoid;
+      }
+      .badge {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 8.5pt;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .done {
+        background: #e6f4ea;
+        color: #1e6b34;
+      }
+      .now {
+        background: #fff4d6;
+        color: #8a5a00;
+      }
+      .todo {
+        background: #eef1f6;
+        color: #3d4a63;
+      }
+      .phase {
+        border: 1px solid #d5dae5;
+        border-left: 5px solid #1e6b34;
+        padding: 10px 14px;
+        margin: 12px 0;
+        page-break-inside: avoid;
+      }
+      .phase.current {
+        border-left-color: #c9a876;
+        background: #fffbf0;
+      }
+      .phase h3 {
+        margin-top: 0;
+      }
+      footer {
+        margin-top: 36px;
+        padding-top: 10px;
+        border-top: 1px solid #d5dae5;
+        font-size: 8.5pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <div class="eyebrow">Estado del proyecto · noviembre 2026</div>
+      <h1>Mood Sense: fases del proyecto</h1>
+      <p>
+        Qué se construyó en cada etapa, en qué etapa estamos hoy y qué falta para que la tienda esté
+        publicada y vendiendo. Pensado para leerse sin conocimientos de programación.
+      </p>
+    </header>
+
+    <h2><span class="num">1</span>Resumen en una mirada</h2>
+    <table>
+      <tr>
+        <th>Fase</th>
+        <th>Qué es</th>
+        <th>Estado</th>
+      </tr>
+      <tr>
+        <td>0</td>
+        <td>Preparar las herramientas de trabajo</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Base de datos y cuentas de usuario</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Catálogo por dentro (productos, filtros, buscador)</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Vitrina: portada, listado y ficha de producto</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Carrito y pago</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Área "Mi cuenta" del cliente</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Panel de administración</td>
+        <td><span class="badge done">Terminada</span></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Pulido final y salida a internet</td>
+        <td><span class="badge now">En curso (actual)</span></td>
+      </tr>
+    </table>
+    <div class="tip">
+      <strong>Dónde estamos:</strong> en la <strong>Fase 7</strong>, la última. La tienda funciona
+      completa en la computadora de desarrollo. Lo que falta es principalmente
+      <strong>publicarla en internet</strong>
+      y algunos elementos que dependen de terceros (logo final del diseñador, cuenta de Stripe). No
+      hay una Fase 8: cuando se cierren los pendientes de la Fase 7, el proyecto queda entregado.
+    </div>
+
+    <h2><span class="num">2</span>Fases terminadas</h2>
+
+    <div class="phase">
+      <h3>Fase 0 · Preparar las herramientas <span class="badge done">Terminada</span></h3>
+      <p>
+        Se creó el proyecto vacío con sus herramientas: el framework (Next.js), el sistema de
+        estilos, los colores y tipografías de la marca, y los servicios que corren en la computadora
+        (base de datos, buscador y caché) mediante Docker.
+      </p>
+    </div>
+
+    <div class="phase">
+      <h3>Fase 1 · Base de datos y cuentas <span class="badge done">Terminada</span></h3>
+      <p>
+        Se diseñó dónde se guarda todo: marcas, categorías, productos con sus tallas y colores
+        (variantes), stock, direcciones, pedidos y lista de deseos. Se cargaron datos de ejemplo (6
+        marcas, 20 productos) y se construyó el inicio de sesión con email y contraseña (y Google
+        como opción). Las contraseñas se guardan cifradas.
+      </p>
+    </div>
+
+    <div class="phase">
+      <h3>Fase 2 · Catálogo por dentro <span class="badge done">Terminada</span></h3>
+      <p>
+        Se construyeron las "consultas" internas que usan las páginas: listar productos con filtros
+        (categoría, marca, género, precio, ofertas), ordenar y paginar, ver el detalle de un
+        producto, y el buscador inteligente que entiende errores de tipeo (Meilisearch).
+      </p>
+    </div>
+
+    <div class="phase">
+      <h3>Fase 3 · Vitrina de la tienda <span class="badge done">Terminada</span></h3>
+      <p>
+        Las páginas que ve el cliente: portada editorial con el slogan, listado de productos con
+        filtros (también en celular), ficha de producto con galería y selector de talla y color con
+        stock real, y la página de búsqueda. Las páginas se guardan pre-armadas para cargar rápido.
+      </p>
+    </div>
+
+    <div class="phase">
+      <h3>Fase 4 · Carrito y pago <span class="badge done">Terminada</span></h3>
+      <p>
+        Carrito que recuerda los productos aunque se cierre el navegador, con cantidades limitadas
+        al stock. Pago con tarjeta mediante Stripe: los precios siempre se toman de la base de datos
+        (el cliente no puede alterarlos) y el stock se descuenta al confirmarse el pago. Stripe
+        quedó construido y probado, pero <strong>apagado</strong> hasta tener una cuenta (ver Fase
+        7).
+      </p>
+    </div>
+
+    <div class="phase">
+      <h3>Fase 5 · Mi cuenta <span class="badge done">Terminada</span></h3>
+      <p>
+        Pantallas de registro e inicio de sesión, y el área privada del cliente: editar perfil y
+        contraseña, libreta de direcciones, historial de pedidos y lista de deseos. Cada cliente
+        solo puede ver lo suyo.
+      </p>
+      <p>
+        <em>Quedó diferido:</em> recuperar contraseña por email (necesita un servicio de correo).
+      </p>
+    </div>
+
+    <div class="phase">
+      <h3>Fase 6 · Panel de administración <span class="badge done">Terminada</span></h3>
+      <p>
+        Panel solo para administradores: tablero de ventas (ingresos, pedidos, productos más
+        vendidos, alertas de poco stock), alta/edición/baja de productos con sus variantes e
+        imágenes, y gestión de pedidos con estados controlados (no se puede, por ejemplo, entregar
+        un pedido que no se pagó).
+      </p>
+    </div>
+
+    <h2><span class="num">3</span>Fase actual: Fase 7 · Pulido final</h2>
+    <div class="phase current">
+      <h3>Ya completado dentro de la Fase 7</h3>
+      <ul>
+        <li>
+          <strong>Pedidos por WhatsApp</strong> como forma de cobro activa: el cliente deja sus
+          datos, el pedido queda "pendiente de pago" con el stock apartado, el operador confirma el
+          pago desde el panel, y los pedidos no confirmados se cancelan solos a las 48 horas
+          devolviendo el stock.
+        </li>
+        <li>
+          <strong>Documentos</strong>: especificación de logotipos e imágenes para el diseñador,
+          brief de diseño y manual de administración.
+        </li>
+        <li>
+          <strong>SEO</strong> (aparecer bien en Google y al compartir en redes): mapa del sitio,
+          robots, datos de producto para Google.
+        </li>
+        <li><strong>Pruebas automáticas</strong> de punta a punta de registro, login y compra.</li>
+        <li>
+          <strong>Subida de imágenes</strong> desde el panel (Vercel Blob) y preparación para
+          publicar en Vercel.
+        </li>
+        <li>
+          <strong>Noviembre 2026</strong>: configuración documentada (.env), revisión de seguridad,
+          simplificación del código, documentación de cada función, guía de mantenimiento y guía de
+          publicación.
+        </li>
+      </ul>
+    </div>
+
+    <h2><span class="num">4</span>Qué falta</h2>
+    <table>
+      <tr>
+        <th>Pendiente</th>
+        <th>Quién</th>
+        <th>Qué se necesita</th>
+      </tr>
+      <tr>
+        <td><strong>Publicar la tienda en internet</strong></td>
+        <td>Dueño + desarrollo</td>
+        <td>Crear cuentas gratuitas en Vercel y Neon y seguir la guía "Publicar Mood Sense".</td>
+      </tr>
+      <tr>
+        <td>Logo final, ícono del navegador e imagen para redes</td>
+        <td>Diseñador</td>
+        <td>Entregar los archivos según el brief de diseño.</td>
+      </tr>
+      <tr>
+        <td>Aviso automático de pedidos por WhatsApp</td>
+        <td>Dueño</td>
+        <td>
+          Cuenta de WhatsApp Business Cloud API (Meta). Mientras tanto el aviso queda en el registro
+          del servidor y en el panel de pedidos.
+        </td>
+      </tr>
+      <tr>
+        <td>Pago con tarjeta (Stripe)</td>
+        <td>Dueño</td>
+        <td>Abrir cuenta en Stripe y pasar las claves. El código ya está listo.</td>
+      </tr>
+      <tr>
+        <td>Cupones de descuento</td>
+        <td>Dueño (decisión)</td>
+        <td>Hoy no existen. Decidir si se quieren; se construirían aparte.</td>
+      </tr>
+      <tr>
+        <td>Recuperar contraseña por email</td>
+        <td>Dueño + desarrollo</td>
+        <td>Cuenta en un servicio de correo (Resend). Diferido desde la Fase 5.</td>
+      </tr>
+      <tr>
+        <td>Página de producto inexistente</td>
+        <td>Desarrollo (menor)</td>
+        <td>
+          Hoy muestra "no encontrado" correctamente, pero técnicamente responde como página válida.
+          No afecta a Google (está marcada para no indexarse).
+        </td>
+      </tr>
+    </table>
+
+    <footer>
+      <span>Mood Sense · Wear your vibe. Make the match.</span
+      ><span>Fases del proyecto · v1 · nov 2026</span>
+    </footer>
+  </body>
+</html>

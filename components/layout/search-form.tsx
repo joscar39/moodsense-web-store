@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 
+/**
+ * Buscador del header: al enviar navega a `/search?q=…` (ignora búsquedas vacías).
+ *
+ * @example
+ * <SearchForm defaultQuery="hoodie" />
+ */
 export function SearchForm({ defaultQuery = "" }: { defaultQuery?: string }) {
   const router = useRouter();
 

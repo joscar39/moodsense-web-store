@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -5,13 +6,25 @@ import { ClearCartOnMount } from "@/components/cart/clear-cart-on-mount";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { auth } from "@/lib/auth";
+import { orderAccessCookieName } from "@/lib/checkout/order-access";
 import { prisma } from "@/lib/db/prisma";
 import { formatPrice } from "@/lib/format/price";
 
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Pedido recibido" };
+export const metadata: Metadata = { title: "Pedido recibido", robots: { index: false } };
 
+/**
+ * Página /checkout/confirmation/[id]: confirmación del pedido manual (WhatsApp).
+ *
+ * Solo la ve quien hizo el pedido: el navegador que lo creó (cookie privada) o
+ * el usuario con sesión dueño del pedido. Para cualquier otro responde 404,
+ * así un enlace filtrado no expone nombre, artículos ni total.
+ *
+ * @example
+ * // URL: /checkout/confirmation/cm1abc (tras POST /api/checkout/manual)
+ */
 export default async function OrderConfirmationPage({
   params,
 }: {
@@ -21,7 +34,12 @@ export default async function OrderConfirmationPage({
   const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) notFound();
 
-  const operatorPhone = process.env.NEXT_PUBLIC_WHATSAPP_OPERATOR_PHONE;
+  const hasAccessCookie = (await cookies()).has(orderAccessCookieName(order.id));
+  const session = hasAccessCookie ? null : await auth();
+  const isOwner = Boolean(order.userId) && session?.user?.id === order.userId;
+  if (!hasAccessCookie && !isOwner) notFound();
+
+  const operatorPhone = process.env.WHATSAPP_OPERATOR_PHONE?.replace(/\D/g, "");
   const waText = encodeURIComponent(
     `Hola, soy ${order.shippingFullName ?? "cliente de Mood Sense"}. Acabo de hacer el pedido ${order.id} por ${formatPrice(order.totalCents)} y quiero coordinar el pago.`
   );

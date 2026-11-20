@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 
 import { ProductForm } from "@/components/admin/product-form";
 import { getAdminProduct } from "@/lib/admin/products";
-import { ApiError } from "@/lib/api/handle-api-error";
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
 import { prisma } from "@/lib/db/prisma";
 
@@ -10,17 +9,19 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Editar producto" };
 
+/**
+ * Página /admin/products/[id]: formulario de edición precargado (centavos → USD).
+ * Responde 404 si el producto no existe.
+ *
+ * @example
+ * // GET /admin/products/abc123 → ProductForm con los datos del producto
+ */
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminPage();
   const { id } = await params;
 
-  let product;
-  try {
-    product = await getAdminProduct(id);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) notFound();
-    throw error;
-  }
+  const product = await getAdminProduct(id);
+  if (!product) notFound();
 
   const [brands, categories] = await Promise.all([
     prisma.brand.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),

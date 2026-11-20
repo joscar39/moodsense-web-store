@@ -3,8 +3,15 @@ import { redirect } from "next/navigation";
 import { AccountNav } from "@/components/account/account-nav";
 import { auth } from "@/lib/auth";
 
+/**
+ * Layout de /account/**: exige sesión (redirige a /login si no hay) y pinta el
+ * saludo con la navegación lateral de la cuenta.
+ *
+ * @example
+ * // Envuelve /account, /account/orders, /account/addresses y /account/wishlist.
+ */
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  // The middleware already gates /account; this is the in-depth server check.
+  // El middleware ya protege /account; esta es la verificación de defensa en profundidad.
   const session = await auth();
   if (!session?.user) redirect("/login?callbackUrl=%2Faccount");
 

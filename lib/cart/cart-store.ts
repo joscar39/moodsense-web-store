@@ -14,8 +14,12 @@ type CartState = {
 };
 
 /**
- * Client cart, persisted to localStorage. Prices/stock here are display
- * snapshots — the checkout endpoint re-validates everything against the DB.
+ * Carrito del navegador (Zustand), persistido en localStorage (`moodsense-cart`).
+ * Precios y stock son snapshots para mostrar: el checkout revalida todo contra la DB.
+ *
+ * @example
+ * const items = useCartStore((state) => state.items);
+ * useCartStore.getState().addItem(item);
  */
 export const useCartStore = create<CartState>()(
   persist(

@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+/**
+ * Franja con los nombres de las marcas; cada uno lleva al catálogo filtrado por esa marca.
+ *
+ * @example
+ * <BrandStrip brands={[{ slug: "atlas-supply", name: "Atlas Supply" }]} />
+ */
 export function BrandStrip({ brands }: { brands: { slug: string; name: string }[] }) {
   return (
     <section className="border-y">

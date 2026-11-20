@@ -5,7 +5,6 @@ import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { OrderStatusControl } from "@/components/admin/order-status-control";
 import { Separator } from "@/components/ui/separator";
 import { getAdminOrder } from "@/lib/admin/orders";
-import { ApiError } from "@/lib/api/handle-api-error";
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
 import { formatPrice } from "@/lib/format/price";
 
@@ -15,6 +14,13 @@ export const metadata: Metadata = { title: "Detalle de pedido" };
 
 const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" });
 
+/**
+ * Página /admin/orders/[id]: detalle de un pedido (items, envío, payment
+ * intent) con los botones de cambio de estado. 404 si no existe.
+ *
+ * @example
+ * // GET /admin/orders/ord_123 → detalle + OrderStatusControl
+ */
 export default async function AdminOrderDetailPage({
   params,
 }: {
@@ -23,13 +29,8 @@ export default async function AdminOrderDetailPage({
   await requireAdminPage();
   const { id } = await params;
 
-  let order;
-  try {
-    order = await getAdminOrder(id);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) notFound();
-    throw error;
-  }
+  const order = await getAdminOrder(id);
+  if (!order) notFound();
 
   return (
     <div>

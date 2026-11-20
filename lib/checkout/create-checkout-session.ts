@@ -2,7 +2,7 @@ import { ApiError } from "@/lib/api/handle-api-error";
 import { prisma } from "@/lib/db/prisma";
 import { getStripe } from "@/lib/stripe/client";
 
-import { validateCart } from "./validate-cart";
+import { loadValidatedCart, toOrderItems } from "./validate-cart";
 
 import type { CheckoutInput } from "@/lib/validators/checkout";
 
@@ -11,64 +11,34 @@ const CHECKOUT_EXPIRES_MINUTES = 30;
 const SHIPPING_COUNTRIES = ["DO", "US", "ES", "MX", "CO", "PR"] as const;
 
 /**
- * Creates a PENDING order (with price/SKU snapshots taken from the DB) and a
- * Stripe Checkout Session for it. Stock is validated here but only decremented
- * when the webhook confirms payment. Returns the hosted checkout URL.
+ * Checkout con Stripe (modo dormido): crea un pedido PENDING con snapshot de
+ * precios/SKU tomados de la DB y una Checkout Session hosted para pagarlo.
+ * El stock se valida aquí pero solo se descuenta cuando el webhook confirma
+ * el pago. Si Stripe falla, el pedido queda CANCELLED (sin huérfanos).
  *
- * Throws:
- * - CART_INVALID (400) when items are unknown/inactive, with per-item details.
- * - INSUFFICIENT_STOCK (409) when quantities exceed stock, with availability.
+ * Lanza CART_INVALID (400) o INSUFFICIENT_STOCK (409) con detalle por ítem
+ * (ver `loadValidatedCart`), y CHECKOUT_FAILED (502) si Stripe no da URL.
+ *
+ * @example
+ * const { url, orderId } = await createCheckoutSession({ items }, user);
+ * // redirigir al navegador a `url` (página de pago de Stripe)
  */
 export async function createCheckoutSession(
   input: CheckoutInput,
   user: { id: string; email: string } | null
 ) {
-  const variants = await prisma.productVariant.findMany({
-    where: { id: { in: input.items.map((item) => item.variantId) } },
-    select: {
-      id: true,
-      sku: true,
-      size: true,
-      color: true,
-      priceCents: true,
-      stock: true,
-      product: { select: { name: true, slug: true, isActive: true, priceCents: true } },
-    },
-  });
-
-  const { lines, issues, subtotalCents } = validateCart(input.items, variants);
-
-  if (issues.length > 0) {
-    const stockOnly = issues.every((issue) => issue.code === "INSUFFICIENT_STOCK");
-    throw new ApiError(
-      stockOnly ? "INSUFFICIENT_STOCK" : "CART_INVALID",
-      stockOnly
-        ? "No hay stock suficiente para algunos productos del carrito."
-        : "Algunos productos del carrito ya no están disponibles.",
-      stockOnly ? 409 : 400,
-      issues
-    );
-  }
+  const { lines, subtotalCents } = await loadValidatedCart(input.items);
 
   const order = await prisma.order.create({
     data: {
       userId: user?.id ?? null,
-      // Guest checkout: the definitive email arrives with the webhook.
+      // Checkout de invitado: el email definitivo llega con el webhook.
       email: user?.email ?? "",
       subtotalCents,
       shippingCents: 0,
       taxCents: 0,
       totalCents: subtotalCents,
-      items: {
-        create: lines.map((line) => ({
-          variantId: line.variantId,
-          productName: line.productName,
-          variantLabel: line.variantLabel,
-          sku: line.sku,
-          unitPriceCents: line.unitPriceCents,
-          quantity: line.quantity,
-        })),
-      },
+      items: { create: toOrderItems(lines) },
     },
   });
 
@@ -108,7 +78,7 @@ export async function createCheckoutSession(
 
     return { url: session.url, orderId: order.id };
   } catch (error) {
-    // Don't leave an orphan PENDING order if Stripe was never reached.
+    // No dejar un pedido PENDING huérfano si nunca se llegó a Stripe.
     await prisma.order
       .update({ where: { id: order.id }, data: { status: "CANCELLED" } })
       .catch(() => undefined);

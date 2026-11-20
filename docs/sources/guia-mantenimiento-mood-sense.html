@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mood Sense — Guía de funcionamiento y mantenimiento</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 20mm 18mm;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 10.5pt;
+        line-height: 1.55;
+      }
+      header.cover {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 42px 40px;
+        margin-bottom: 30px;
+      }
+      header.cover .eyebrow {
+        font-size: 9pt;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #c9a876;
+        margin-bottom: 12px;
+      }
+      header.cover h1 {
+        font-family: Georgia, serif;
+        font-size: 26pt;
+        font-weight: 500;
+      }
+      header.cover p {
+        margin-top: 10px;
+        color: rgba(245, 243, 239, 0.85);
+        max-width: 36em;
+      }
+      h2 {
+        font-family: Georgia, serif;
+        font-size: 16pt;
+        font-weight: 500;
+        margin: 30px 0 10px;
+        padding: 8px 0 6px;
+        border-bottom: 2px solid #0b1a33;
+        page-break-after: avoid;
+      }
+      h2 .num {
+        color: #c9a876;
+        margin-right: 8px;
+      }
+      h3 {
+        font-size: 11pt;
+        margin: 16px 0 6px;
+        color: #0b1a33;
+        page-break-after: avoid;
+      }
+      p {
+        margin: 6px 0;
+      }
+      ol,
+      ul {
+        margin: 6px 0 10px 22px;
+      }
+      li {
+        margin: 3px 0;
+      }
+      .tip {
+        background: #f5f3ef;
+        border-left: 4px solid #c9a876;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .warn {
+        background: #fdf2f2;
+        border-left: 4px solid #c0392b;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      .path {
+        background: #eef1f6;
+        border: 1px solid #d5dae5;
+        border-radius: 3px;
+        padding: 1px 6px;
+        font-family: Consolas, monospace;
+        font-size: 9pt;
+      }
+      pre {
+        background: #0b1a33;
+        color: #f5f3ef;
+        padding: 10px 14px;
+        margin: 8px 0;
+        font-family: Consolas, monospace;
+        font-size: 8.5pt;
+        white-space: pre-wrap;
+        border-radius: 3px;
+        page-break-inside: avoid;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        font-size: 9.5pt;
+      }
+      th,
+      td {
+        border: 1px solid #d5dae5;
+        padding: 6px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f5f3ef;
+      }
+      tr {
+        page-break-inside: avoid;
+      }
+      .flow {
+        display: flex;
+        align-items: stretch;
+        gap: 6px;
+        margin: 14px 0;
+        page-break-inside: avoid;
+      }
+      .flow div {
+        flex: 1;
+        border: 1px solid #0b1a33;
+        padding: 8px;
+        font-size: 8.5pt;
+        text-align: center;
+      }
+      .flow div strong {
+        display: block;
+        color: #0b1a33;
+        font-size: 9.5pt;
+        margin-bottom: 3px;
+      }
+      .flow .arrow {
+        flex: 0 0 18px;
+        border: none;
+        padding: 0;
+        align-self: center;
+        font-size: 14pt;
+        color: #c9a876;
+      }
+      footer {
+        margin-top: 36px;
+        padding-top: 10px;
+        border-top: 1px solid #d5dae5;
+        font-size: 8.5pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <div class="eyebrow">Guía de funcionamiento y mantenimiento</div>
+      <h1>Cómo está hecha Mood Sense y cómo cuidarla</h1>
+      <p>
+        Qué hace cada parte de la tienda, con qué está construida, dónde está cada cosa y cómo
+        agregar páginas nuevas. Escrita para que la entienda alguien que no programa y le sirva a
+        quien sí programa.
+      </p>
+    </header>
+
+    <h2><span class="num">1</span>Cómo funciona, en una imagen</h2>
+    <p>Cuando alguien abre la tienda en su celular, pasa esto:</p>
+    <div class="flow">
+      <div><strong>Navegador</strong>El cliente ve páginas y toca botones</div>
+      <div class="arrow">→</div>
+      <div><strong>Páginas</strong>Carpeta <em>app/</em>: arman lo que se ve</div>
+      <div class="arrow">→</div>
+      <div><strong>Lógica del negocio</strong>Carpeta <em>lib/</em>: precios, stock, pedidos</div>
+      <div class="arrow">→</div>
+      <div><strong>Servicios</strong>Base de datos, buscador, WhatsApp</div>
+    </div>
+    <p>
+      Piénsalo como un restaurante. Las <strong>páginas</strong> son el salón: lo que el cliente ve.
+      La <strong>lógica del negocio</strong> es la cocina: ahí están las reglas (cuánto cuesta, si
+      queda stock, cómo se arma un pedido). La <strong>base de datos</strong> es la despensa: guarda
+      productos, clientes y pedidos. El salón nunca va directo a la despensa: siempre pasa por la
+      cocina, que verifica todo. Por eso nadie puede, por ejemplo, cambiar un precio desde su
+      navegador: el precio lo pone siempre la cocina, leyéndolo de la despensa.
+    </p>
+
+    <h2><span class="num">2</span>Con qué está construida</h2>
+    <table>
+      <tr>
+        <th>Pieza</th>
+        <th>Para qué sirve, en simple</th>
+      </tr>
+      <tr>
+        <td><strong>Next.js 15</strong> (framework)</td>
+        <td>
+          El "esqueleto" de la tienda. Une páginas y servidor en un solo proyecto, y prepara las
+          páginas por adelantado para que carguen rápido.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>React 19</strong></td>
+        <td>
+          La forma de construir la pantalla con piezas reutilizables (botones, tarjetas de producto,
+          formularios).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>TypeScript</strong></td>
+        <td>
+          El lenguaje. Es JavaScript con "revisión de tipos": avisa errores antes de que lleguen al
+          cliente.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Tailwind CSS</strong> + <strong>shadcn/ui</strong></td>
+        <td>
+          Estilos (colores, tamaños, espaciados) y componentes visuales base (botones, menús,
+          diálogos).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>PostgreSQL</strong> + <strong>Prisma</strong></td>
+        <td>La base de datos y la herramienta para leerla y escribirla de forma segura.</td>
+      </tr>
+      <tr>
+        <td><strong>Auth.js</strong></td>
+        <td>
+          Inicio de sesión y roles (cliente o administrador). Las contraseñas se guardan cifradas.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Zod</strong></td>
+        <td>
+          El "portero": revisa todo dato que llega de afuera (formularios, links) antes de usarlo.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Meilisearch</strong></td>
+        <td>El buscador que entiende errores de tipeo ("zapatiyas" encuentra "zapatillas").</td>
+      </tr>
+      <tr>
+        <td><strong>Zustand</strong></td>
+        <td>Guarda el carrito en el navegador del cliente aunque cierre la página.</td>
+      </tr>
+      <tr>
+        <td><strong>Stripe</strong> / <strong>WhatsApp</strong></td>
+        <td>Formas de cobro. Hoy está activa WhatsApp; Stripe está lista pero apagada.</td>
+      </tr>
+      <tr>
+        <td><strong>Vitest</strong> / <strong>Playwright</strong></td>
+        <td>
+          Pruebas automáticas: revisan que precios, stock, login y compra sigan funcionando después
+          de cada cambio.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Docker</strong></td>
+        <td>Levanta en la computadora la base de datos y el buscador, sin instalarlos a mano.</td>
+      </tr>
+      <tr>
+        <td><strong>Vercel</strong> + <strong>Neon</strong></td>
+        <td>Donde se publica la tienda en internet y donde vive la base de datos publicada.</td>
+      </tr>
+    </table>
+
+    <h2><span class="num">3</span>Metodología de trabajo</h2>
+    <ul>
+      <li>
+        <strong>Por fases:</strong> el proyecto se construyó en 8 etapas (0 a 7). Al terminar cada
+        una se revisa con el dueño antes de seguir. El documento "Fases del proyecto" explica cada
+        una.
+      </li>
+      <li>
+        <strong>Un solo proyecto ordenado por áreas</strong> ("monolito modular"): tienda, cuenta,
+        admin y pagos viven juntos pero en carpetas separadas. Es más simple de publicar y mantener
+        que varios sistemas sueltos.
+      </li>
+      <li>
+        <strong>Separación de responsabilidades:</strong> las páginas solo muestran, la lógica vive
+        en <span class="path">lib/</span>, y los componentes visuales no acceden a datos.
+      </li>
+      <li>
+        <strong>Seguridad por defecto:</strong> todo dato externo se valida, los permisos se revisan
+        en el servidor (no solo escondiendo botones), el dinero se maneja en centavos exactos y el
+        stock se aparta de forma que dos clientes nunca compren la misma última unidad.
+      </li>
+      <li>
+        <strong>Pruebas automáticas</strong> para lo crítico (precios, stock, pedidos, login), y
+        cada error corregido suma una prueba.
+      </li>
+      <li>
+        <strong>Historial ordenado:</strong> cada cambio se guarda en git con un mensaje estándar
+        (<em>feat:</em> función nueva, <em>fix:</em> corrección, <em>docs:</em> documentación…).
+      </li>
+      <li>
+        <strong>Simplicidad:</strong> se evita construir de más. Una función hace una cosa y se lee
+        de arriba abajo.
+      </li>
+    </ul>
+
+    <h2><span class="num">4</span>Mapa de carpetas</h2>
+    <table>
+      <tr>
+        <th>Carpeta / archivo</th>
+        <th>Qué contiene</th>
+      </tr>
+      <tr>
+        <td><span class="path">app/</span></td>
+        <td>
+          Las <strong>páginas</strong>. Cada carpeta es una dirección del sitio (ver sección 5).
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">app/(shop)/</span></td>
+        <td>Tienda pública: portada, productos, carrito, checkout, búsqueda.</td>
+      </tr>
+      <tr>
+        <td><span class="path">app/(auth)/</span></td>
+        <td>Pantallas de iniciar sesión y registrarse.</td>
+      </tr>
+      <tr>
+        <td><span class="path">app/(account)/</span></td>
+        <td>"Mi cuenta" del cliente: perfil, direcciones, pedidos, deseos.</td>
+      </tr>
+      <tr>
+        <td><span class="path">app/admin/</span></td>
+        <td>Panel de administración (solo administradores).</td>
+      </tr>
+      <tr>
+        <td><span class="path">app/api/</span></td>
+        <td>
+          "Ventanillas" del servidor que reciben pedidos del navegador (agregar dirección, crear
+          pedido…). Solo reciben, revisan y llaman a <span class="path">lib/</span>.
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">lib/</span></td>
+        <td>
+          La <strong>lógica del negocio</strong>, por tema: <em>catalog</em> (productos),
+          <em>checkout</em> (pedidos), <em>inventory</em> (stock), <em>account</em>, <em>admin</em>,
+          <em>auth</em>, <em>search</em>, <em>notifications</em> (WhatsApp),
+          <em>validators</em> (reglas de los formularios).
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">components/</span></td>
+        <td>
+          Piezas visuales reutilizables, agrupadas por zona (<em>home</em>, <em>catalog</em>,
+          <em>cart</em>, <em>admin</em>…).
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">components/ui/</span></td>
+        <td>Componentes base generados por shadcn. <strong>No se editan a mano.</strong></td>
+      </tr>
+      <tr>
+        <td><span class="path">app/globals.css</span></td>
+        <td>Colores y tipografías de la marca.</td>
+      </tr>
+      <tr>
+        <td><span class="path">prisma/</span></td>
+        <td>
+          Estructura de la base de datos (<em>schema.prisma</em>), sus cambios históricos
+          (<em>migrations</em>) y los datos de ejemplo (<em>seed.ts</em>).
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">e2e/</span></td>
+        <td>Pruebas automáticas que simulan a un cliente real en el navegador.</td>
+      </tr>
+      <tr>
+        <td><span class="path">docs/</span></td>
+        <td>
+          Documentos como este. Los PDF se generan desde <span class="path">docs/sources/</span>.
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">.env</span> / <span class="path">.env.example</span></td>
+        <td>
+          Configuración (claves, números, direcciones). <em>.env.example</em> explica cada dato;
+          <em>.env</em> tiene los valores reales y nunca se comparte.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="path">AGENTS.md</span>, <span class="path">.agents/</span>,
+          <span class="path">CLAUDE.md</span>
+        </td>
+        <td>
+          Instrucciones para asistentes de IA (Claude Code y Antigravity). Contienen las reglas y el
+          estado del proyecto.
+        </td>
+      </tr>
+    </table>
+
+    <h2><span class="num">5</span>Cómo se construye una vista (página)</h2>
+    <h3>La regla de oro: la carpeta es la dirección</h3>
+    <p>
+      Dentro de <span class="path">app/</span>, cada carpeta con un archivo
+      <span class="path">page.tsx</span> es una página. El nombre de la carpeta es lo que se escribe
+      en la barra del navegador:
+    </p>
+    <table>
+      <tr>
+        <th>Archivo</th>
+        <th>Dirección en el navegador</th>
+      </tr>
+      <tr>
+        <td><span class="path">app/(shop)/page.tsx</span></td>
+        <td><span class="path">/</span> (portada)</td>
+      </tr>
+      <tr>
+        <td><span class="path">app/(shop)/cart/page.tsx</span></td>
+        <td><span class="path">/cart</span></td>
+      </tr>
+      <tr>
+        <td><span class="path">app/(shop)/products/[slug]/page.tsx</span></td>
+        <td>
+          <span class="path">/products/cualquier-producto</span> (los corchetes significan
+          "variable")
+        </td>
+      </tr>
+      <tr>
+        <td><span class="path">app/admin/orders/page.tsx</span></td>
+        <td><span class="path">/admin/orders</span></td>
+      </tr>
+    </table>
+    <p>
+      Las carpetas <strong>entre paréntesis</strong>, como <span class="path">(shop)</span>, no
+      aparecen en la dirección: solo agrupan páginas que comparten el mismo marco.
+    </p>
+
+    <h3>Los archivos especiales de cada carpeta</h3>
+    <ul>
+      <li><span class="path">page.tsx</span>: el contenido de la página.</li>
+      <li>
+        <span class="path">layout.tsx</span>: el marco que envuelve a todas las páginas de esa
+        carpeta (por ejemplo, el encabezado y pie de la tienda están en
+        <span class="path">app/(shop)/layout.tsx</span>).
+      </li>
+      <li><span class="path">loading.tsx</span>: lo que se ve mientras carga.</li>
+      <li><span class="path">error.tsx</span>: lo que se ve si algo falla.</li>
+    </ul>
+
+    <h3>Ejemplo 1: crear una página "Nosotros" en /nosotros</h3>
+    <ol>
+      <li>
+        Crear la carpeta <span class="path">app/(shop)/nosotros/</span> (dentro de
+        <em>(shop)</em> para que tenga el encabezado y pie de la tienda).
+      </li>
+      <li>Dentro, crear el archivo <span class="path">page.tsx</span> con este contenido:</li>
+    </ol>
+    <pre>
+import type { Metadata } from "next";
+
+// Título que aparece en la pestaña del navegador y en Google.
+export const metadata: Metadata = { title: "Nosotros" };
+
+export default function AboutPage() {
+  return (
+    &lt;div className="mx-auto max-w-3xl px-4 py-10"&gt;
+      &lt;h1 className="font-serif text-4xl"&gt;Nosotros&lt;/h1&gt;
+      &lt;p className="mt-4 text-muted-foreground"&gt;
+        Mood Sense es un concept store multimarca...
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+    <ol start="3">
+      <li>
+        Guardar. Con el proyecto encendido (<span class="path">npm run dev</span>) la página ya
+        existe en <span class="path">localhost:3000/nosotros</span>.
+      </li>
+      <li>
+        Para que aparezca en el menú superior: abrir
+        <span class="path">app/(shop)/layout.tsx</span> y agregar en la lista <em>navLinks</em> una
+        línea como <span class="path">{ label: "Nosotros", href: "/nosotros" }</span>.
+      </li>
+      <li>Para que Google la conozca: agregarla en <span class="path">app/sitemap.ts</span>.</li>
+    </ol>
+
+    <h3>Ejemplo 2: una página que muestra datos de la base</h3>
+    <p>
+      Las páginas piden los datos directamente a una función de <span class="path">lib/</span>,
+      nunca a la base de datos por su cuenta:
+    </p>
+    <pre>
+import { listProducts } from "@/lib/catalog/products";
+
+export default async function OffersPage() {
+  // La "cocina" (lib/) trae solo productos activos y en oferta.
+  const { items } = await listProducts({ onSale: true, page: 1, perPage: 24, sort: "newest" });
+  return &lt;ProductGrid products={items} /&gt;;
+}</pre>
+    <p>
+      Si la página necesita algo que todavía no existe en <span class="path">lib/</span>, primero se
+      agrega la función ahí (con su prueba si toca precios, stock o pedidos) y luego se usa desde la
+      página.
+    </p>
+
+    <h3>Páginas privadas</h3>
+    <ul>
+      <li>
+        Si la página va dentro de <span class="path">app/(account)/account/</span>, ya está
+        protegida: solo entra quien inició sesión.
+      </li>
+      <li>
+        Si va dentro de <span class="path">app/admin/</span>, debe empezar llamando a
+        <span class="path">await requireAdminPage()</span>, igual que las demás páginas del admin.
+        Esconder un botón <strong>no</strong> es seguridad: la verificación siempre se hace en el
+        servidor.
+      </li>
+    </ul>
+
+    <h3>Piezas visuales y estilos</h3>
+    <ul>
+      <li>
+        Si un bloque se repite en varias páginas, va como componente en
+        <span class="path">components/&lt;zona&gt;/</span> (nombre del archivo en minúsculas con
+        guiones, por ejemplo <em>product-card.tsx</em>).
+      </li>
+      <li>
+        Colores de marca disponibles como clases: <span class="path">bg-navy</span>,
+        <span class="path">text-gold</span>, <span class="path">bg-cream</span>,
+        <span class="path">text-ink</span>. Tipografías:
+        <span class="path">font-serif</span> (Playfair, titulares) y la normal (Archivo).
+      </li>
+      <li>
+        Un componente base nuevo (por ejemplo, un selector) se agrega con
+        <span class="path">npx shadcn@latest add select</span>, nunca copiándolo a mano.
+      </li>
+    </ul>
+
+    <h2><span class="num">6</span>Tareas de mantenimiento frecuentes</h2>
+    <table>
+      <tr>
+        <th>Quiero…</th>
+        <th>Cómo</th>
+      </tr>
+      <tr>
+        <td>Encender el proyecto en mi computadora</td>
+        <td>
+          En la terminal de Ubuntu (WSL):
+          <span class="path">cd ~/projects/moodsense-web-store</span>, luego
+          <span class="path">docker compose up -d</span> y <span class="path">npm run dev</span>.
+          Abrir <span class="path">localhost:3000</span>.
+        </td>
+      </tr>
+      <tr>
+        <td>Cargar o editar productos, stock y precios</td>
+        <td>
+          Desde el panel <span class="path">/admin</span> (ver el Manual de administración). No hace
+          falta programar.
+        </td>
+      </tr>
+      <tr>
+        <td>Cambiar textos de la portada</td>
+        <td>
+          <span class="path">components/home/</span> (por ejemplo <em>hero.tsx</em> tiene el slogan
+          principal).
+        </td>
+      </tr>
+      <tr>
+        <td>Cambiar textos del pie de página</td>
+        <td><span class="path">components/layout/site-footer.tsx</span>.</td>
+      </tr>
+      <tr>
+        <td>Cambiar colores de la marca</td>
+        <td>
+          <span class="path">app/globals.css</span>, sección de tokens (<em>--navy</em>,
+          <em>--gold</em>…).
+        </td>
+      </tr>
+      <tr>
+        <td>Cambiar el número de WhatsApp o una clave</td>
+        <td>
+          Editar <span class="path">.env</span> (las explicaciones están en
+          <span class="path">.env.example</span>) y reiniciar. En la versión publicada: Vercel →
+          Settings → Environment Variables → Redeploy.
+        </td>
+      </tr>
+      <tr>
+        <td>Rehacer el índice del buscador</td>
+        <td><span class="path">npm run search:sync</span></td>
+      </tr>
+      <tr>
+        <td>Revisar que todo sigue funcionando</td>
+        <td>
+          <span class="path">npm run lint</span>, <span class="path">npm test</span> y
+          <span class="path">npm run test:e2e</span>. Si alguno falla, no publicar.
+        </td>
+      </tr>
+      <tr>
+        <td>Cambiar la estructura de la base de datos</td>
+        <td>
+          Editar <span class="path">prisma/schema.prisma</span> y correr
+          <span class="path">npm run db:migrate</span> (tarea para un programador).
+        </td>
+      </tr>
+      <tr>
+        <td>Publicar en internet</td>
+        <td>Ver el documento "Publicar Mood Sense".</td>
+      </tr>
+    </table>
+
+    <h2><span class="num">7</span>Reglas para mantenerla segura</h2>
+    <ul>
+      <li>
+        El archivo <span class="path">.env</span> nunca se sube a GitHub ni se envía por chat o
+        email.
+      </li>
+      <li>
+        Nada secreto va en variables que empiezan con <span class="path">NEXT_PUBLIC_</span>: esas
+        las puede ver cualquier visitante.
+      </li>
+      <li>
+        Todo dato que llega de un formulario o un link se valida con las reglas de
+        <span class="path">lib/validators/</span> antes de usarlo.
+      </li>
+      <li>
+        Cada función que lee datos de un cliente filtra por su usuario: un cliente nunca puede ver
+        lo de otro, aunque adivine un enlace.
+      </li>
+      <li>Las páginas y ventanillas del admin verifican el rol en el servidor, cada vez.</li>
+      <li>
+        No se escriben datos personales (teléfonos, direcciones) en los registros del servidor.
+      </li>
+      <li>
+        Las contraseñas de prueba (<em>admin1234</em>) solo existen en la computadora de desarrollo.
+      </li>
+      <li>Antes de publicar un cambio, deben pasar las pruebas automáticas.</li>
+    </ul>
+
+    <h2><span class="num">8</span>Trabajar con asistentes de IA</h2>
+    <p>
+      El proyecto incluye instrucciones para Claude Code y Google Antigravity en
+      <span class="path">AGENTS.md</span> y <span class="path">.agents/rules/</span>. Ahí están las
+      reglas del proyecto, el estado actual y las decisiones tomadas, así que cualquier asistente
+      trabaja con los mismos criterios. Al pedirle cambios, basta con describir qué se quiere. El
+      asistente sabe dónde va cada cosa y debe actualizar esas reglas cuando el proyecto cambia.
+    </p>
+
+    <h2><span class="num">9</span>Glosario</h2>
+    <table>
+      <tr>
+        <th>Palabra</th>
+        <th>Significado</th>
+      </tr>
+      <tr>
+        <td>Vista / página</td>
+        <td>Una pantalla del sitio con su propia dirección.</td>
+      </tr>
+      <tr>
+        <td>Componente</td>
+        <td>Una pieza visual reutilizable (una tarjeta de producto, un botón).</td>
+      </tr>
+      <tr>
+        <td>API / ventanilla</td>
+        <td>Punto del servidor que recibe una acción del navegador y responde.</td>
+      </tr>
+      <tr>
+        <td>Base de datos</td>
+        <td>Donde se guarda todo de forma permanente.</td>
+      </tr>
+      <tr>
+        <td>Variante</td>
+        <td>Una combinación de talla y color de un producto, con su propio stock.</td>
+      </tr>
+      <tr>
+        <td>Seed</td>
+        <td>Datos de ejemplo para probar.</td>
+      </tr>
+      <tr>
+        <td>Deploy / publicar</td>
+        <td>Subir la versión actual a internet.</td>
+      </tr>
+      <tr>
+        <td>Variable de entorno</td>
+        <td>Un dato de configuración guardado fuera del código (en <em>.env</em> o en Vercel).</td>
+      </tr>
+      <tr>
+        <td>Git / commit</td>
+        <td>Historial de cambios del proyecto / un cambio guardado en ese historial.</td>
+      </tr>
+    </table>
+
+    <footer>
+      <span>Mood Sense · Wear your vibe. Make the match.</span
+      ><span>Guía de mantenimiento · v1 · nov 2026</span>
+    </footer>
+  </body>
+</html>

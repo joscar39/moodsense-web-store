@@ -1,12 +1,22 @@
 import { z } from "zod";
 
-/** POST /api/checkout body: only ids and quantities — prices come from the DB. */
+import { MAX_QUANTITY_PER_LINE } from "@/lib/cart/cart-logic";
+
+import { emailField, nameField, optionalText } from "./fields";
+
+/**
+ * Body de POST /api/checkout (Stripe): solo ids y cantidades; los precios
+ * salen de la DB.
+ *
+ * @example
+ * checkoutSchema.parse({ items: [{ variantId: "v1", quantity: 2 }] });
+ */
 export const checkoutSchema = z.object({
   items: z
     .array(
       z.object({
         variantId: z.string().min(1),
-        quantity: z.coerce.number().int().min(1).max(99),
+        quantity: z.coerce.number().int().min(1).max(MAX_QUANTITY_PER_LINE),
       })
     )
     .min(1, "El carrito está vacío.")
@@ -15,47 +25,32 @@ export const checkoutSchema = z.object({
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
-/** POST /api/checkout/manual — flujo de pago manual vía WhatsApp. */
+/**
+ * Body de POST /api/checkout/manual (pago manual vía WhatsApp): carrito +
+ * datos de contacto y envío. El email es opcional ("" se trata como ausente).
+ *
+ * @example
+ * manualCheckoutSchema.parse({
+ *   items: [{ variantId: "v1", quantity: 1 }],
+ *   customer: { name: "Ana", phone: "+1 809 555 0100", email: "" },
+ *   shipping: { line1: "Calle 1", city: "Santo Domingo" }, // country → "DO"
+ * });
+ */
 export const manualCheckoutSchema = checkoutSchema.extend({
   customer: z.object({
-    name: z
-      .string({ error: "El nombre es obligatorio." })
-      .trim()
-      .min(2, "El nombre debe tener al menos 2 caracteres.")
-      .max(120),
+    name: nameField(120),
     phone: z
       .string({ error: "El teléfono es obligatorio." })
       .trim()
       .regex(/^\+?[0-9\s-]{8,20}$/, "Teléfono inválido (incluye el código de país)."),
-    email: z
-      .string()
-      .trim()
-      .pipe(z.email({ error: "Email inválido." }))
-      .transform((value) => value.toLowerCase())
-      .optional()
-      .or(z.literal("").transform(() => undefined)),
+    email: emailField.optional().or(z.literal("").transform(() => undefined)),
   }),
   shipping: z.object({
     line1: z.string({ error: "La dirección es obligatoria." }).trim().min(3).max(160),
-    line2: z
-      .string()
-      .trim()
-      .max(160)
-      .optional()
-      .transform((value) => value || undefined),
+    line2: optionalText(160),
     city: z.string({ error: "La ciudad es obligatoria." }).trim().min(2).max(80),
-    state: z
-      .string()
-      .trim()
-      .max(80)
-      .optional()
-      .transform((value) => value || undefined),
-    postalCode: z
-      .string()
-      .trim()
-      .max(12)
-      .optional()
-      .transform((value) => value || undefined),
+    state: optionalText(80),
+    postalCode: optionalText(12),
     country: z
       .string()
       .trim()
@@ -68,9 +63,12 @@ export const manualCheckoutSchema = checkoutSchema.extend({
 export type ManualCheckoutInput = z.infer<typeof manualCheckoutSchema>;
 
 /**
- * Schema del FORMULARIO (sin `items`): el carrito no vive en react-hook-form
- * — se fusiona al enviar. Validar `items` en el cliente haría fallar siempre
- * el submit con "carrito vacío".
+ * Schema del FORMULARIO de checkout manual (sin `items`): el carrito no vive
+ * en react-hook-form, se fusiona al enviar. Validar `items` en el cliente
+ * haría fallar siempre el submit con "carrito vacío".
+ *
+ * @example
+ * useForm<ManualCheckoutFormValues>({ resolver: zodResolver(manualCheckoutFormSchema) });
  */
 export const manualCheckoutFormSchema = manualCheckoutSchema.omit({ items: true });
 export type ManualCheckoutFormValues = z.input<typeof manualCheckoutFormSchema>;

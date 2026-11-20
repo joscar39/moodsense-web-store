@@ -13,6 +13,13 @@ import { profileSchema } from "@/lib/validators/account";
 
 import type { ProfileInput } from "@/lib/validators/account";
 
+/**
+ * Formulario para editar el nombre del usuario (PATCH /api/account/profile);
+ * al guardar refresca la página para mostrar el nombre nuevo.
+ *
+ * @example
+ * <ProfileForm defaultName={user.name ?? ""} />
+ */
 export function ProfileForm({ defaultName }: { defaultName: string }) {
   const router = useRouter();
   const {

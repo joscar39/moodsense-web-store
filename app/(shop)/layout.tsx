@@ -4,6 +4,14 @@ import { listCategoryTree } from "@/lib/catalog/categories";
 
 import type { NavLink } from "@/components/layout/site-header";
 
+/**
+ * Layout de la tienda pública: header fijo con navegación por categorías, contenido
+ * y footer. Los enlaces se generan a partir de las categorías raíz de la base de datos.
+ *
+ * @example
+ * // Envuelve /, /products, /products/[slug], /search, /cart, /checkout…
+ * // Enlace generado: { label: "Camisetas", href: "/products?category=camisetas" }
+ */
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const categories = await listCategoryTree();
 

@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
 
-import { createAddress, listAddresses } from "@/lib/account/addresses";
+import { createAddress } from "@/lib/account/addresses";
 import { handleApiError } from "@/lib/api/handle-api-error";
 import { requireUser } from "@/lib/auth/require-user";
 import { addressSchema } from "@/lib/validators/account";
 
-export async function GET() {
-  try {
-    const user = await requireUser();
-    const addresses = await listAddresses(user.id);
-    return NextResponse.json({ data: addresses });
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
-
+/**
+ * POST /api/account/addresses: crea una dirección del usuario autenticado
+ * (la primera, o una marcada `isDefault`, pasa a ser la principal).
+ *
+ * @example
+ * // POST /api/account/addresses { fullName, line1, city, postalCode, country: "DO" }
+ * // 201 { data: { id, ... } } · 400 validación · 401 sin sesión
+ */
 export async function POST(request: Request) {
   try {
     const user = await requireUser();

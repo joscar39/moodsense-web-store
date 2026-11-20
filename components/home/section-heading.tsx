@@ -1,5 +1,12 @@
 import Link from "next/link";
 
+/**
+ * Encabezado de sección: antetítulo, título serif y enlace opcional "ver más"
+ * (solo aparece si llegan `href` y `linkLabel`; oculto en móvil).
+ *
+ * @example
+ * <SectionHeading eyebrow="La selección" title="Destacados" href="/products?featured=true" linkLabel="Ver todo" />
+ */
 export function SectionHeading({
   eyebrow,
   title,

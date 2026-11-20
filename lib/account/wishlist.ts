@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/db/prisma";
 
-/** Wishlist entries with the data the product card needs. */
+/**
+ * Productos activos de la wishlist con los datos que pide la tarjeta de producto.
+ *
+ * @example
+ * const items = await listWishlist(userId); // [{ productId, slug, name, inStock, ... }]
+ */
 export async function listWishlist(userId: string) {
   const entries = await prisma.wishlistItem.findMany({
     where: { userId },
@@ -36,7 +41,12 @@ export async function listWishlist(userId: string) {
     }));
 }
 
-/** Product ids only — used by client toggles to know the current state. */
+/**
+ * Solo los ids de producto: los usa el corazón de la PDP para saber su estado.
+ *
+ * @example
+ * const ids = await listWishlistProductIds(userId); // ["prod1", "prod2"]
+ */
 export async function listWishlistProductIds(userId: string) {
   const entries = await prisma.wishlistItem.findMany({
     where: { userId },
@@ -45,7 +55,12 @@ export async function listWishlistProductIds(userId: string) {
   return entries.map((entry) => entry.productId);
 }
 
-/** Idempotent add (re-adding an existing entry is a no-op). */
+/**
+ * Añade un producto a la wishlist; idempotente (repetirlo no hace nada).
+ *
+ * @example
+ * await addToWishlist(userId, productId);
+ */
 export async function addToWishlist(userId: string, productId: string) {
   await prisma.wishlistItem.upsert({
     where: { userId_productId: { userId, productId } },
@@ -54,7 +69,12 @@ export async function addToWishlist(userId: string, productId: string) {
   });
 }
 
-/** Idempotent remove. */
+/**
+ * Quita un producto de la wishlist; idempotente.
+ *
+ * @example
+ * await removeFromWishlist(userId, productId);
+ */
 export async function removeFromWishlist(userId: string, productId: string) {
   await prisma.wishlistItem.deleteMany({ where: { userId, productId } });
 }

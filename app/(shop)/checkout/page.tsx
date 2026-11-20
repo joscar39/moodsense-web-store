@@ -6,6 +6,13 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Finalizar pedido" };
 
+/**
+ * Página /checkout: formulario de pedido manual (WhatsApp). Con Stripe activo
+ * redirige al carrito, porque el pago es la página hosted de Stripe.
+ *
+ * @example
+ * // URL: /checkout
+ */
 export default function CheckoutPage() {
   // Con Stripe activo el checkout es la página hosted de Stripe, no esta.
   if (process.env.NEXT_PUBLIC_CHECKOUT_MODE === "stripe") redirect("/cart");

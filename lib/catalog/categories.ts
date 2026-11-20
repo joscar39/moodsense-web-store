@@ -4,7 +4,13 @@ const activeProductCount = {
   _count: { select: { products: { where: { isActive: true } } } },
 };
 
-/** Two-level category tree (top-level with children), with active product counts. */
+/**
+ * Árbol de categorías de dos niveles (raíces con sus hijas) con el número de
+ * productos activos de cada una. Lo usan el header, los filtros y /api/categories.
+ *
+ * @example
+ * const tree = await listCategoryTree(); // [{ slug: "ropa", children: [{ slug: "camisetas" }] }]
+ */
 export async function listCategoryTree() {
   const categories = await prisma.category.findMany({
     where: { parentId: null },
@@ -28,6 +34,12 @@ export async function listCategoryTree() {
   }));
 }
 
+/**
+ * Aplana el `_count` de Prisma a `productCount`.
+ *
+ * @example
+ * toCategoryNode({ id, name, slug, description, _count: { products: 3 } }); // { ..., productCount: 3 }
+ */
 function toCategoryNode(category: {
   id: string;
   name: string;

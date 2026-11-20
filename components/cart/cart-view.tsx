@@ -9,20 +9,23 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { cartSubtotalCents, MAX_QUANTITY_PER_LINE } from "@/lib/cart/cart-logic";
+import { applyCartIssues } from "@/lib/cart/apply-cart-issues";
+import { cartSubtotalCents, maxSelectable } from "@/lib/cart/cart-logic";
 import { useCartStore } from "@/lib/cart/cart-store";
 import { formatPrice } from "@/lib/format/price";
-
-type CheckoutIssue = {
-  variantId: string;
-  code: string;
-  message: string;
-  availableStock?: number;
-};
+import { variantLabel } from "@/lib/format/variant-label";
 
 // "whatsapp" (pedido manual) por defecto; "stripe" reactiva el checkout hosted.
 const CHECKOUT_MODE = process.env.NEXT_PUBLIC_CHECKOUT_MODE ?? "whatsapp";
 
+/**
+ * Página del carrito: líneas con +/−/quitar, resumen y botón de finalizar.
+ * En modo WhatsApp lleva a /checkout; en modo Stripe crea la sesión de pago y,
+ * si el servidor rechaza el carrito (400/409), lo corrige y avisa al usuario.
+ *
+ * @example
+ * <CartView />
+ */
 export function CartView() {
   const router = useRouter();
   const { items, setQuantity, removeItem } = useCartStore();
@@ -66,28 +69,18 @@ export function CartView() {
           items: items.map(({ variantId, quantity }) => ({ variantId, quantity })),
         }),
       });
-      const body: unknown = await response.json();
-
       if (!response.ok) {
-        const error = (body as { error?: { message?: string; details?: CheckoutIssue[] } }).error;
-        for (const issue of error?.details ?? []) {
-          toast.error(issue.message);
-          // Sync the cart with real availability so the user can retry.
-          if (issue.code === "INSUFFICIENT_STOCK") {
-            setQuantity(issue.variantId, issue.availableStock ?? 0);
-          }
-          if (issue.code === "NOT_FOUND" || issue.code === "INACTIVE") {
-            removeItem(issue.variantId);
-          }
-        }
-        if (!error?.details?.length) {
-          toast.error(error?.message ?? "No se pudo iniciar el pago.");
-        }
+        const messages = await applyCartIssues(
+          response,
+          { setQuantity, removeItem },
+          "No se pudo iniciar el pago."
+        );
+        messages.forEach((message) => toast.error(message));
         return;
       }
 
-      const url = (body as { data: { url: string } }).data.url;
-      window.location.assign(url);
+      const { data } = (await response.json()) as { data: { url: string } };
+      window.location.assign(data.url);
     } catch {
       toast.error("No se pudo iniciar el pago. Inténtalo de nuevo.");
     } finally {
@@ -99,8 +92,7 @@ export function CartView() {
     <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
       <ul className="divide-y">
         {items.map((item) => {
-          const variantLabel = [item.color, item.size].filter(Boolean).join(" · ");
-          const maxSelectable = Math.min(Math.max(item.maxStock, 1), MAX_QUANTITY_PER_LINE);
+          const label = variantLabel(item.color, item.size);
           return (
             <li key={item.variantId} className="flex gap-4 py-6">
               <Link
@@ -125,7 +117,7 @@ export function CartView() {
                 <Link href={`/products/${item.productSlug}`} className="text-sm font-medium">
                   {item.name}
                 </Link>
-                {variantLabel && <p className="text-xs text-muted-foreground">{variantLabel}</p>}
+                {label && <p className="text-xs text-muted-foreground">{label}</p>}
                 <p className="font-mono text-xs text-muted-foreground">{item.sku}</p>
 
                 <div className="mt-2 flex items-center gap-3">
@@ -145,7 +137,7 @@ export function CartView() {
                       size="icon"
                       className="size-8 rounded-none"
                       aria-label="Sumar uno"
-                      disabled={item.quantity >= maxSelectable}
+                      disabled={item.quantity >= maxSelectable(item.maxStock)}
                       onClick={() => setQuantity(item.variantId, item.quantity + 1)}
                     >
                       <PlusIcon className="size-3.5" />

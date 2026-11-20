@@ -14,37 +14,42 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ApiError } from "@/lib/api/handle-api-error";
 import { getProductBySlug, listActiveProductSlugs, listProducts } from "@/lib/catalog/products";
 import { productListQuerySchema } from "@/lib/validators/catalog";
 
 import type { Metadata } from "next";
 
-// ISR: detail pages are prerendered and revalidate every 5 minutes.
+// ISR: las PDP se prerenderizan y se revalidan cada 5 minutos.
 export const revalidate = 300;
 
 type Params = Promise<{ slug: string }>;
 
+/**
+ * Slugs a prerenderizar en build (SSG + ISR).
+ *
+ * @example
+ * // [{ slug: "oversized-tee" }, ...]
+ */
 export async function generateStaticParams() {
   const slugs = await listActiveProductSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-// cache() dedupes the query between generateMetadata and the page render.
-const loadProduct = cache(async (slug: string) => {
-  try {
-    return await getProductBySlug(slug);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) return null;
-    throw error;
-  }
-});
+// cache() evita repetir la consulta entre generateMetadata y el render; null = no existe.
+const loadProduct = cache(getProductBySlug);
 
+/**
+ * Metadata SEO de la PDP (título, descripción, canonical y OpenGraph). Si el
+ * producto no existe devuelve un título de fallback; nunca lanza notFound().
+ *
+ * @example
+ * // /products/oversized-tee → { title: "Oversized Tee · Nocturne", ... }
+ */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const product = await loadProduct(slug);
-  // notFound() must NOT be thrown from generateMetadata: it downgrades the
-  // response to a soft 404 (200). The page component throws it instead.
+  // notFound() NO debe lanzarse desde generateMetadata: degrada la respuesta a
+  // soft 404 (200). Lo lanza el componente de la página.
   if (!product) return { title: "Producto no encontrado" };
   const image = product.images[0];
   return {
@@ -60,6 +65,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
+/**
+ * Página /products/[slug] (PDP): galería, selector de talla/color con stock,
+ * wishlist, JSON-LD de schema.org y productos relacionados. 404 si no existe.
+ *
+ * @example
+ * // GET /products/oversized-tee
+ */
 export default async function ProductPage({ params }: { params: Params }) {
   const { slug } = await params;
   const product = await loadProduct(slug);
@@ -96,7 +108,8 @@ export default async function ProductPage({ params }: { params: Params }) {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // "<" escapado: un texto de producto con "</script>" no puede inyectar código.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <Breadcrumb className="mb-8">
         <BreadcrumbList>

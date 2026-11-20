@@ -7,7 +7,7 @@ import type { Gender } from "@/lib/generated/prisma/enums";
 
 export const PRODUCTS_INDEX = "products";
 
-export const PRODUCTS_INDEX_SETTINGS = {
+const PRODUCTS_INDEX_SETTINGS = {
   searchableAttributes: ["name", "brandName", "categoryName", "description"],
   filterableAttributes: [
     "brandSlug",
@@ -22,6 +22,7 @@ export const PRODUCTS_INDEX_SETTINGS = {
   sortableAttributes: ["priceCents", "createdAtTimestamp"],
 };
 
+/** Documento desnormalizado que guarda Meilisearch por cada producto activo. */
 export type ProductSearchDocument = {
   id: string;
   name: string;
@@ -43,16 +44,24 @@ export type ProductSearchDocument = {
   createdAtTimestamp: number;
 };
 
-type ProductForIndex = Prisma.ProductGetPayload<{
-  include: {
-    brand: { select: { name: true; slug: true } };
-    category: { select: { name: true; slug: true; parent: { select: { slug: true } } } };
-    images: { select: { url: true; alt: true }; orderBy: { position: "asc" }; take: 1 };
-    variants: { select: { stock: true } };
-  };
-}>;
+/** Relaciones que hacen falta para armar un documento del índice. */
+const productIndexInclude = {
+  brand: { select: { name: true, slug: true } },
+  category: { select: { name: true, slug: true, parent: { select: { slug: true } } } },
+  images: { select: { url: true, alt: true }, orderBy: { position: "asc" }, take: 1 },
+  variants: { select: { stock: true } },
+} satisfies Prisma.ProductInclude;
 
-export function buildProductDocument(product: ProductForIndex): ProductSearchDocument {
+type ProductForIndex = Prisma.ProductGetPayload<{ include: typeof productIndexInclude }>;
+
+/**
+ * Convierte un producto de la DB (con `productIndexInclude`) en el documento
+ * plano que indexa Meilisearch.
+ *
+ * @example
+ * const doc = buildProductDocument(product); // { id, name, brandSlug, inStock, ... }
+ */
+function buildProductDocument(product: ProductForIndex): ProductSearchDocument {
   return {
     id: product.id,
     name: product.name,
@@ -75,16 +84,12 @@ export function buildProductDocument(product: ProductForIndex): ProductSearchDoc
   };
 }
 
-const productIndexInclude = {
-  brand: { select: { name: true, slug: true } },
-  category: { select: { name: true, slug: true, parent: { select: { slug: true } } } },
-  images: { select: { url: true, alt: true }, orderBy: { position: "asc" as const }, take: 1 },
-  variants: { select: { stock: true } },
-};
-
 /**
- * Upserts (or removes, if deleted/inactive) a single product document.
- * Fire-and-forget from admin CRUD: failures are logged, never block the write.
+ * Actualiza (o elimina, si se borró o está inactivo) el documento de un producto.
+ * Lo llama el CRUD del admin: los fallos se loggean y nunca bloquean la escritura.
+ *
+ * @example
+ * await syncProductDocument(product.id);
  */
 export async function syncProductDocument(productId: string) {
   try {
@@ -105,9 +110,11 @@ export async function syncProductDocument(productId: string) {
 }
 
 /**
- * Full reindex: applies index settings, upserts every active product and
- * removes inactive/deleted ones. Idempotent — safe to run repeatedly.
- * Manual for now (`npm run search:sync`); will be triggered by admin CRUD in Phase 6.
+ * Reindexado completo: aplica los settings del índice, sube todos los productos
+ * activos y elimina los inactivos. Idempotente; se ejecuta con `npm run search:sync`.
+ *
+ * @example
+ * const { indexed, removed } = await syncProductsIndex(); // { indexed: 20, removed: 0 }
  */
 export async function syncProductsIndex() {
   const client = getMeiliClient();
@@ -116,14 +123,7 @@ export async function syncProductsIndex() {
   await client.createIndex(PRODUCTS_INDEX, { primaryKey: "id" }).waitTask();
   await index.updateSettings(PRODUCTS_INDEX_SETTINGS).waitTask();
 
-  const products = await prisma.product.findMany({
-    include: {
-      brand: { select: { name: true, slug: true } },
-      category: { select: { name: true, slug: true, parent: { select: { slug: true } } } },
-      images: { select: { url: true, alt: true }, orderBy: { position: "asc" as const }, take: 1 },
-      variants: { select: { stock: true } },
-    },
-  });
+  const products = await prisma.product.findMany({ include: productIndexInclude });
 
   const active = products.filter((product) => product.isActive);
   const inactiveIds = products.filter((product) => !product.isActive).map((product) => product.id);

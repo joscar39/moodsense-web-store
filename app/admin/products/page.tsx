@@ -11,6 +11,13 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Productos" };
 
+/**
+ * Página /admin/products: tabla de todos los productos (incluidos inactivos)
+ * con stock agregado y acciones de editar/eliminar.
+ *
+ * @example
+ * // GET /admin/products → tabla del catálogo + botón "Nuevo producto"
+ */
 export default async function AdminProductsPage() {
   await requireAdminPage();
   const products = await listAdminProducts();

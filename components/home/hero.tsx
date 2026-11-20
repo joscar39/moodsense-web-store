@@ -2,6 +2,12 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
+/**
+ * Portada de la home con el slogan oficial y botones a todo el catálogo y a rebajas.
+ *
+ * @example
+ * <Hero />
+ */
 export function Hero() {
   return (
     <section className="border-b">

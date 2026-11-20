@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAX_QUANTITY_PER_LINE,
   addItemToCart,
   cartCount,
   cartSubtotalCents,
@@ -34,8 +35,8 @@ describe("clampQuantity", () => {
     expect(clampQuantity(20, 8)).toBe(8);
   });
 
-  it("caps at 99 even with huge stock", () => {
-    expect(clampQuantity(500, 10_000)).toBe(99);
+  it("caps at MAX_QUANTITY_PER_LINE even with huge stock", () => {
+    expect(clampQuantity(500, 10_000)).toBe(MAX_QUANTITY_PER_LINE);
   });
 
   it("keeps at least 1 when stock reports 0 (server re-validates)", () => {

@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 
 import { handleApiError, ApiError } from "@/lib/api/handle-api-error";
-import { auth } from "@/lib/auth";
+import { getOptionalUser } from "@/lib/auth/require-user";
 import { createManualOrder } from "@/lib/checkout/create-manual-order";
+import { orderAccessCookieName } from "@/lib/checkout/order-access";
 import { manualCheckoutSchema } from "@/lib/validators/checkout";
 
+/**
+ * POST /api/checkout/manual: crea un pedido "pendiente de pago" (modo WhatsApp).
+ *
+ * Además deja en el navegador del comprador una cookie privada que le permite
+ * ver la página de confirmación de ESE pedido (nadie más puede verla).
+ *
+ * @example
+ * fetch("/api/checkout/manual", { method: "POST", body: JSON.stringify({ items, customer, shipping }) })
+ * // 201 { data: { orderId } } · 400 datos inválidos · 409 sin stock · 429 demasiados pedidos
+ */
 export async function POST(request: Request) {
   try {
     if (process.env.NEXT_PUBLIC_CHECKOUT_MODE === "stripe") {
@@ -14,14 +25,17 @@ export async function POST(request: Request) {
     const body: unknown = await request.json();
     const input = manualCheckoutSchema.parse(body);
 
-    const session = await auth();
-    const user =
-      session?.user?.id && session.user.email
-        ? { id: session.user.id, email: session.user.email }
-        : null;
+    const result = await createManualOrder(input, await getOptionalUser());
 
-    const result = await createManualOrder(input, user);
-    return NextResponse.json({ data: result }, { status: 201 });
+    const response = NextResponse.json({ data: result }, { status: 201 });
+    response.cookies.set(orderAccessCookieName(result.orderId), "1", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/checkout/confirmation",
+      maxAge: 60 * 60 * 24 * 7, // 7 días
+    });
+    return response;
   } catch (error) {
     return handleApiError(error);
   }

@@ -1,3 +1,5 @@
+// Amplía los tipos de Auth.js para que la sesión, el usuario y el JWT incluyan
+// `id` y `role` (USER/ADMIN). Ej.: `const session = await auth(); session?.user.role`.
 import type { Role } from "@/lib/generated/prisma/enums";
 import type { DefaultSession } from "next-auth";
 
@@ -14,8 +16,8 @@ declare module "next-auth" {
   }
 }
 
-// `next-auth/jwt` is a re-export of `@auth/core/jwt`; the augmentation must
-// target the original module or it will not merge with the JWT interface.
+// `next-auth/jwt` re-exporta `@auth/core/jwt`; la ampliación debe apuntar al módulo
+// original o no se fusiona con la interfaz JWT.
 declare module "@auth/core/jwt" {
   interface JWT {
     id: string;

@@ -1,6 +1,11 @@
-import { ApiError } from "@/lib/api/handle-api-error";
 import { prisma } from "@/lib/db/prisma";
 
+/**
+ * Pedidos del usuario, del más reciente al más antiguo, para "Mis pedidos".
+ *
+ * @example
+ * const orders = await listOrders(session.user.id);
+ */
 export function listOrders(userId: string) {
   return prisma.order.findMany({
     where: { userId },
@@ -15,14 +20,17 @@ export function listOrders(userId: string) {
   });
 }
 
-/** Order detail, strictly scoped to its owner (404 otherwise). */
-export async function getOrder(userId: string, orderId: string) {
-  const order = await prisma.order.findFirst({
+/**
+ * Detalle de un pedido, estrictamente scoped a su dueño: devuelve `null` si no
+ * existe o es de otro usuario (la página responde 404, sin revelar existencia).
+ *
+ * @example
+ * const order = await getOrder(session.user.id, id);
+ * if (!order) notFound();
+ */
+export function getOrder(userId: string, orderId: string) {
+  return prisma.order.findFirst({
     where: { id: orderId, userId },
     include: { items: true },
   });
-  if (!order) {
-    throw new ApiError("NOT_FOUND", "Pedido no encontrado.", 404);
-  }
-  return order;
 }

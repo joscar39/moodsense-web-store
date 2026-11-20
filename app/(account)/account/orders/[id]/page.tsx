@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { Separator } from "@/components/ui/separator";
 import { getOrder } from "@/lib/account/orders";
-import { ApiError } from "@/lib/api/handle-api-error";
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format/price";
 
@@ -14,17 +13,19 @@ export const metadata: Metadata = { title: "Detalle del pedido" };
 
 const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" });
 
+/**
+ * Página /account/orders/[id]: detalle de un pedido propio (items, totales y
+ * envío). Un pedido ajeno o inexistente responde 404.
+ *
+ * @example
+ * // GET /account/orders/ord_123 → detalle del pedido
+ */
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const { id } = await params;
 
-  let order;
-  try {
-    order = await getOrder(session!.user.id, id);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) notFound();
-    throw error;
-  }
+  const order = await getOrder(session!.user.id, id);
+  if (!order) notFound();
 
   const hasShipping = Boolean(order.shippingLine1);
 

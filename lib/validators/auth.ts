@@ -1,35 +1,32 @@
 import { z } from "zod";
 
-/** Shared between the register form (client) and POST /api/auth/register. */
+import { emailField, nameField, passwordField } from "./fields";
+
+/**
+ * Datos de registro. Lo comparten el formulario (cliente) y POST /api/auth/register.
+ *
+ * @example
+ * registerSchema.parse({ name: "Ana", email: "Ana@Example.com", password: "segura1234" });
+ * // { name: "Ana", email: "ana@example.com", password: "segura1234" }
+ */
 export const registerSchema = z.object({
-  name: z
-    .string({ error: "El nombre es obligatorio." })
-    .trim()
-    .min(2, "El nombre debe tener al menos 2 caracteres.")
-    .max(80, "El nombre no puede superar 80 caracteres."),
-  email: z
-    .string({ error: "El email es obligatorio." })
-    .trim()
-    .pipe(z.email({ error: "Email inválido." }))
-    .transform((value) => value.toLowerCase()),
-  password: z
-    .string({ error: "La contraseña es obligatoria." })
-    .min(8, "La contraseña debe tener al menos 8 caracteres.")
-    // bcrypt only uses the first 72 bytes of input.
-    .max(72, "La contraseña no puede superar 72 caracteres.")
-    .regex(/[a-zA-Z]/, "La contraseña debe incluir al menos una letra.")
-    .regex(/\d/, "La contraseña debe incluir al menos un número."),
+  name: nameField(80, "El nombre no puede superar 80 caracteres."),
+  email: emailField,
+  password: passwordField,
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-/** Shared between the login form (client) and the Credentials provider. */
+/**
+ * Credenciales de login. Lo comparten el formulario (cliente) y el provider
+ * Credentials de Auth.js. Aquí no se aplica la política de contraseña: solo
+ * se exige que no esté vacía.
+ *
+ * @example
+ * loginSchema.parse({ email: "USER@example.com", password: "x" }); // email en minúsculas
+ */
 export const loginSchema = z.object({
-  email: z
-    .string({ error: "El email es obligatorio." })
-    .trim()
-    .pipe(z.email({ error: "Email inválido." }))
-    .transform((value) => value.toLowerCase()),
+  email: emailField,
   password: z
     .string({ error: "La contraseña es obligatoria." })
     .min(1, "La contraseña es obligatoria."),

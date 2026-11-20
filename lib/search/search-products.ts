@@ -9,6 +9,13 @@ import { PRODUCTS_INDEX } from "./products-index";
 import type { ProductSearchDocument } from "./products-index";
 import type { SearchQuery } from "@/lib/validators/catalog";
 
+/**
+ * Búsqueda de texto libre con typo-tolerance en Meilisearch, con los mismos
+ * filtros que el PLP. Responde 503 si el índice aún no existe.
+ *
+ * @example
+ * const { items, total } = await searchProducts(searchQuerySchema.parse({ q: "hoodie" }));
+ */
 export async function searchProducts(query: SearchQuery) {
   const index = getMeiliClient().index<ProductSearchDocument>(PRODUCTS_INDEX);
 
@@ -29,7 +36,7 @@ export async function searchProducts(query: SearchQuery) {
       totalPages: result.totalPages ?? 0,
     };
   } catch (error) {
-    // Index missing means the sync never ran on this environment.
+    // Índice inexistente = nunca se corrió el sync en este entorno.
     if (error instanceof MeilisearchApiError && error.cause?.code === "index_not_found") {
       throw new ApiError(
         "SEARCH_UNAVAILABLE",

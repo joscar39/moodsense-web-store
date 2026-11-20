@@ -4,6 +4,12 @@ import { prisma } from "@/lib/db/prisma";
 
 import type { PasswordChangeInput, ProfileInput } from "@/lib/validators/account";
 
+/**
+ * Actualiza el nombre visible del usuario.
+ *
+ * @example
+ * await updateProfile(userId, { name: "Ana Pérez" }); // { id, name, email }
+ */
 export async function updateProfile(userId: string, input: ProfileInput) {
   return prisma.user.update({
     where: { id: userId },
@@ -13,8 +19,11 @@ export async function updateProfile(userId: string, input: ProfileInput) {
 }
 
 /**
- * Changes the password of a credentials user after verifying the current one.
- * OAuth-only accounts (no passwordHash) cannot set a password here.
+ * Cambia la contraseña de un usuario con credenciales tras verificar la actual
+ * (400 si no coincide). Las cuentas solo-OAuth (sin passwordHash) no pueden.
+ *
+ * @example
+ * await changePassword(userId, { currentPassword: "vieja123", newPassword: "nueva1234" });
  */
 export async function changePassword(userId: string, input: PasswordChangeInput) {
   const user = await prisma.user.findUniqueOrThrow({

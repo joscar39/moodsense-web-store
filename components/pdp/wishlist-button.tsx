@@ -8,8 +8,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 /**
- * Heart toggle on the PDP. The page is ISR-cached and user-agnostic, so the
- * wishlist state is fetched client-side; anonymous users are sent to /login.
+ * Botón corazón de la ficha de producto para guardar o quitar de la wishlist.
+ * La página es ISR (la misma para todos), así que el estado se consulta desde el
+ * navegador; si el usuario no inició sesión, lo envía a /login.
+ *
+ * @example
+ * <WishlistButton productId="clx123abc" slug="cloud-heavy-hoodie" />
  */
 export function WishlistButton({ productId, slug }: { productId: string; slug: string }) {
   const router = useRouter();
@@ -19,7 +23,7 @@ export function WishlistButton({ productId, slug }: { productId: string; slug: s
     let cancelled = false;
     fetch("/api/account/wishlist")
       .then(async (response) => {
-        if (!response.ok) return; // anonymous: leave state as unknown/false
+        if (!response.ok) return; // anónimo: el estado queda desconocido/false
         const body = (await response.json()) as { data: { productIds: string[] } };
         if (!cancelled) setInWishlist(body.data.productIds.includes(productId));
       })
@@ -29,6 +33,7 @@ export function WishlistButton({ productId, slug }: { productId: string; slug: s
     };
   }, [productId]);
 
+  // Agrega o quita según el estado actual; 401 → login con regreso a esta PDP.
   const toggle = async () => {
     const response = await fetch(
       inWishlist ? `/api/account/wishlist/${productId}` : "/api/account/wishlist",

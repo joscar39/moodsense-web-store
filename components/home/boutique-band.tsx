@@ -2,7 +2,13 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
-/** Premium band in boutique mode (navy + gold), the "Dark/Lujo" brand variant. */
+/**
+ * Banda premium en modo boutique (navy + dorado, variante "Dark/Lujo" de la marca)
+ * con botón hacia la selección destacada.
+ *
+ * @example
+ * <BoutiqueBand />
+ */
 export function BoutiqueBand() {
   return (
     <section className="dark bg-navy text-foreground">

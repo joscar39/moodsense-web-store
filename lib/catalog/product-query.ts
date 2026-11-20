@@ -2,10 +2,14 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 import type { ProductListQuery, ProductSort } from "@/lib/validators/catalog";
 
 /**
- * Builds the Prisma where clause for a validated product list query.
- * Only active products are ever exposed. `categoryIds` (the requested
- * category plus its children) is resolved by the caller; an empty array
- * means "category not found" and matches nothing.
+ * Construye el `where` de Prisma para una consulta de listado ya validada.
+ * Solo se exponen productos activos. `categoryIds` (la categoría pedida más sus
+ * hijas) lo resuelve quien llama; un array vacío = categoría inexistente y no
+ * coincide con nada.
+ *
+ * @example
+ * buildProductWhere(query, ["idRopa", "idCamisetas"]);
+ * // { isActive: true, categoryId: { in: ["idRopa", "idCamisetas"] } }
  */
 export function buildProductWhere(
   query: ProductListQuery,
@@ -30,6 +34,12 @@ export function buildProductWhere(
   return where;
 }
 
+/**
+ * Traduce el orden pedido a `orderBy` de Prisma (con desempate estable por fecha).
+ *
+ * @example
+ * buildProductOrderBy("price-asc"); // [{ priceCents: "asc" }, { createdAt: "desc" }]
+ */
 export function buildProductOrderBy(sort: ProductSort): Prisma.ProductOrderByWithRelationInput[] {
   switch (sort) {
     case "price-asc":

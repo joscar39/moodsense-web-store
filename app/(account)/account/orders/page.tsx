@@ -11,6 +11,12 @@ export const metadata: Metadata = { title: "Mis pedidos" };
 
 const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long" });
 
+/**
+ * Página /account/orders: lista de pedidos del usuario con estado y total.
+ *
+ * @example
+ * // GET /account/orders → enlaces a /account/orders/[id]
+ */
 export default async function OrdersPage() {
   const session = await auth();
   const orders = await listOrders(session!.user.id);

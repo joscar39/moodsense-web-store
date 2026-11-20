@@ -9,6 +9,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 
 import type { NavLink } from "./site-header";
 
+/**
+ * Menú hamburguesa para móvil: abre un panel lateral con los enlaces de navegación
+ * y se cierra al elegir uno. Oculto en desktop.
+ *
+ * @example
+ * <MobileNav links={[{ label: "Todo", href: "/products" }]} />
+ */
 export function MobileNav({ links }: { links: NavLink[] }) {
   const [open, setOpen] = useState(false);
 

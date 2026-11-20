@@ -12,15 +12,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { safeCallbackUrl } from "@/lib/auth/safe-callback-url";
 import { loginSchema } from "@/lib/validators/auth";
 
 import type { LoginInput } from "@/lib/validators/auth";
 
+/**
+ * Formulario de login con email y contraseña (provider Credentials) y botón
+ * opcional de Google. Al entrar redirige al `callbackUrl` seguro (por defecto
+ * /account). Necesita un `<Suspense>` arriba porque lee los search params.
+ *
+ * @example
+ * <Suspense><LoginForm withGoogle={false} /></Suspense>
+ */
 export function LoginForm({ withGoogle }: { withGoogle: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/account";
-  // Auth.js redirects failed provider logins back with ?error=…
+  const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
+  // Auth.js devuelve aquí los logins fallidos de un provider con ?error=…
   const [formError, setFormError] = useState<string | null>(
     searchParams.get("error") ? "No se pudo iniciar sesión. Verifica tus credenciales." : null
   );

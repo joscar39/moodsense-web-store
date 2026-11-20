@@ -6,6 +6,12 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Nuevo producto" };
 
+/**
+ * Página /admin/products/new: formulario vacío para crear un producto.
+ *
+ * @example
+ * // GET /admin/products/new → ProductForm sin productId
+ */
 export default async function NewProductPage() {
   await requireAdminPage();
   const [brands, categories] = await Promise.all([

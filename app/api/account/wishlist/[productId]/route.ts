@@ -4,6 +4,12 @@ import { removeFromWishlist } from "@/lib/account/wishlist";
 import { handleApiError } from "@/lib/api/handle-api-error";
 import { requireUser } from "@/lib/auth/require-user";
 
+/**
+ * DELETE /api/account/wishlist/[productId]: quita un producto (idempotente).
+ *
+ * @example
+ * // DELETE /api/account/wishlist/p1 → 200 { data: { removed: true } } · 401 sin sesión
+ */
 export async function DELETE(
   _request: Request,
   context: { params: Promise<{ productId: string }> }

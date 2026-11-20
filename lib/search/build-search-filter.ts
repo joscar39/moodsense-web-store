@@ -1,12 +1,15 @@
 import type { SearchQuery } from "@/lib/validators/catalog";
 
-/** JSON.stringify escapes quotes/backslashes, preventing filter injection. */
+/** JSON.stringify escapa comillas y barras: evita inyección en la sintaxis de filtros. */
 const quote = (value: string) => JSON.stringify(value);
 
 /**
- * Maps validated search params to Meilisearch filter expressions.
- * A category slug matches either the category itself or its parent, so
- * searching within "ropa" includes products indexed under "camisetas".
+ * Traduce los parámetros de búsqueda validados a expresiones de filtro de
+ * Meilisearch. Una categoría coincide con la propia o con su padre, así que
+ * buscar dentro de "ropa" incluye productos indexados en "camisetas".
+ *
+ * @example
+ * buildSearchFilter(query); // ['brandSlug = "nocturne"', "priceCents >= 1000"]
  */
 export function buildSearchFilter(query: SearchQuery): string[] {
   const filter: string[] = [];
@@ -33,6 +36,12 @@ const SEARCH_SORT_MAP: Record<SearchQuery["sort"], string[] | undefined> = {
   newest: ["createdAtTimestamp:desc"],
 };
 
+/**
+ * Traduce el orden pedido a la sintaxis de Meilisearch (`undefined` = relevancia).
+ *
+ * @example
+ * buildSearchSort("price-desc"); // ["priceCents:desc"]
+ */
 export function buildSearchSort(sort: SearchQuery["sort"]): string[] | undefined {
   return SEARCH_SORT_MAP[sort];
 }

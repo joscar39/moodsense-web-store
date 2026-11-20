@@ -2,6 +2,12 @@ import { ProductCard } from "./product-card";
 
 import type { ProductCardData } from "./product-card";
 
+/**
+ * Grilla responsive de `ProductCard`; si la lista está vacía muestra un mensaje de "sin resultados".
+ *
+ * @example
+ * <ProductGrid products={[hoodie, gorra]} />
+ */
 export function ProductGrid({ products }: { products: ProductCardData[] }) {
   if (products.length === 0) {
     return (

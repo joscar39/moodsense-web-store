@@ -12,11 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { readApiError } from "@/lib/api/client-errors";
 import { adminProductFormSchema, toAdminProductPayload } from "@/lib/validators/admin";
 
 import type { AdminProductFormValues } from "@/lib/validators/admin";
 
-export type SelectOption = { id: string; name: string };
+type SelectOption = { id: string; name: string };
 
 const GENDER_OPTIONS = [
   { value: "UNISEX", label: "Unisex" },
@@ -27,6 +28,12 @@ const GENDER_OPTIONS = [
 const selectClass =
   "border-input bg-background mt-1.5 h-9 w-full rounded-md border px-3 text-sm shadow-xs";
 
+/**
+ * Genera un slug kebab-case sin acentos a partir del nombre.
+ *
+ * @example
+ * slugify("Camiseta Básica Negra"); // "camiseta-basica-negra"
+ */
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -36,18 +43,21 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-async function readError(response: Response) {
-  const body: unknown = await response.json().catch(() => null);
-  return (body as { error?: { message?: string } } | null)?.error?.message;
-}
-
+/**
+ * Formulario de alta/edición de producto del admin (precios en USD, imágenes
+ * por subida o URL y variantes). Valida con zod, convierte a centavos y envía
+ * POST (crear) o PATCH (editar con `productId`).
+ *
+ * @example
+ * <ProductForm productId={product.id} defaultValues={values} brands={brands} categories={categories} />
+ */
 export function ProductForm({
   productId,
   defaultValues,
   brands,
   categories,
 }: {
-  /** Present when editing; absent when creating. */
+  /** Presente al editar; ausente al crear. */
   productId?: string;
   defaultValues: AdminProductFormValues;
   brands: SelectOption[];
@@ -83,7 +93,7 @@ export function ProductForm({
     );
 
     if (!response.ok) {
-      toast.error((await readError(response)) ?? "No se pudo guardar el producto.");
+      toast.error((await readApiError(response)) ?? "No se pudo guardar el producto.");
       return;
     }
     toast.success(productId ? "Producto actualizado." : "Producto creado.");
@@ -213,7 +223,7 @@ export function ProductForm({
                     body: formData,
                   });
                   if (!response.ok) {
-                    toast.error((await readError(response)) ?? "No se pudo subir la imagen.");
+                    toast.error((await readApiError(response)) ?? "No se pudo subir la imagen.");
                     return;
                   }
                   const body = (await response.json()) as { data: { url: string } };

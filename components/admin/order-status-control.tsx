@@ -5,21 +5,18 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { ALLOWED_TRANSITIONS } from "@/lib/admin/order-status";
+import { ALLOWED_TRANSITIONS, ORDER_STATUS_LABELS } from "@/lib/admin/order-status";
+import { readApiError } from "@/lib/api/client-errors";
 
 import type { OrderStatus } from "@/lib/generated/prisma/enums";
 
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: "Pendiente",
-  PENDING_PAYMENT: "Pago pendiente",
-  PAID: "Pagado",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-  EXPIRED: "Expirado",
-  REFUNDED: "Reembolsado",
-};
-
+/**
+ * Botones con las transiciones de estado permitidas para un pedido (admin).
+ * Pide confirmación antes de cancelar/reembolsar y refresca la página al aplicar.
+ *
+ * @example
+ * <OrderStatusControl orderId={order.id} status={order.status} />
+ */
 export function OrderStatusControl({ orderId, status }: { orderId: string; status: OrderStatus }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -32,7 +29,7 @@ export function OrderStatusControl({ orderId, status }: { orderId: string; statu
   const apply = async (target: OrderStatus) => {
     if (
       (target === "CANCELLED" || target === "REFUNDED") &&
-      !window.confirm(`¿Marcar el pedido como ${STATUS_LABELS[target].toLowerCase()}?`)
+      !window.confirm(`¿Marcar el pedido como ${ORDER_STATUS_LABELS[target].toLowerCase()}?`)
     ) {
       return;
     }
@@ -44,14 +41,10 @@ export function OrderStatusControl({ orderId, status }: { orderId: string; statu
     });
     setBusy(false);
     if (!response.ok) {
-      const body: unknown = await response.json().catch(() => null);
-      toast.error(
-        (body as { error?: { message?: string } } | null)?.error?.message ??
-          "No se pudo actualizar el estado."
-      );
+      toast.error((await readApiError(response)) ?? "No se pudo actualizar el estado.");
       return;
     }
-    toast.success(`Pedido marcado como ${STATUS_LABELS[target].toLowerCase()}.`);
+    toast.success(`Pedido marcado como ${ORDER_STATUS_LABELS[target].toLowerCase()}.`);
     router.refresh();
   };
 
@@ -66,7 +59,7 @@ export function OrderStatusControl({ orderId, status }: { orderId: string; statu
           disabled={busy}
           onClick={() => apply(target)}
         >
-          → {STATUS_LABELS[target]}
+          → {ORDER_STATUS_LABELS[target]}
         </Button>
       ))}
     </div>

@@ -12,15 +12,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { applyCartIssues } from "@/lib/cart/apply-cart-issues";
 import { cartSubtotalCents } from "@/lib/cart/cart-logic";
 import { useCartStore } from "@/lib/cart/cart-store";
 import { formatPrice } from "@/lib/format/price";
+import { variantLabel } from "@/lib/format/variant-label";
 import { manualCheckoutFormSchema } from "@/lib/validators/checkout";
 
 import type { ManualCheckoutFormValues } from "@/lib/validators/checkout";
 
-type CheckoutIssue = { variantId: string; code: string; message: string; availableStock?: number };
-
+/**
+ * Formulario de checkout manual (WhatsApp): pide contacto y envío, muestra el
+ * resumen del carrito y crea el pedido en POST /api/checkout/manual. Si el
+ * servidor rechaza el carrito (400/409), lo corrige y avisa al usuario.
+ *
+ * @example
+ * <ManualCheckoutForm />
+ */
 export function ManualCheckoutForm() {
   const router = useRouter();
   const { items, setQuantity, removeItem } = useCartStore();
@@ -66,26 +74,22 @@ export function ManualCheckoutForm() {
         items: items.map(({ variantId, quantity }) => ({ variantId, quantity })),
       }),
     });
-    const body: unknown = await response.json();
-
     if (!response.ok) {
-      const error = (body as { error?: { message?: string; details?: CheckoutIssue[] } }).error;
-      for (const issue of error?.details ?? []) {
-        toast.error(issue.message);
-        if (issue.code === "INSUFFICIENT_STOCK") {
-          setQuantity(issue.variantId, issue.availableStock ?? 0);
-        }
-        if (issue.code === "NOT_FOUND" || issue.code === "INACTIVE") {
-          removeItem(issue.variantId);
-        }
-      }
-      if (!error?.details?.length) {
-        toast.error(error?.message ?? "No se pudo crear el pedido.");
-      }
+      const messages = await applyCartIssues(
+        response,
+        { setQuantity, removeItem },
+        "No se pudo crear el pedido."
+      );
+      messages.forEach((message) => toast.error(message));
       return;
     }
 
-    const orderId = (body as { data: { orderId: string } }).data.orderId;
+    const body: unknown = await response.json().catch(() => null);
+    const orderId = (body as { data?: { orderId?: string } } | null)?.data?.orderId;
+    if (!orderId) {
+      toast.error("No se pudo crear el pedido.");
+      return;
+    }
     router.push(`/checkout/confirmation/${orderId}`);
   });
 
@@ -198,22 +202,20 @@ export function ManualCheckoutForm() {
       <aside className="h-fit border p-6">
         <h2 className="mb-4 text-xs tracking-[0.25em] uppercase">Tu pedido</h2>
         <ul className="space-y-2 text-sm">
-          {items.map((item) => (
-            <li key={item.variantId} className="flex justify-between gap-3">
-              <span>
-                {item.quantity} × {item.name}
-                {(item.color || item.size) && (
-                  <span className="text-muted-foreground">
-                    {" "}
-                    ({[item.color, item.size].filter(Boolean).join(" · ")})
-                  </span>
-                )}
-              </span>
-              <span className="tabular-nums">
-                {formatPrice(item.unitPriceCents * item.quantity)}
-              </span>
-            </li>
-          ))}
+          {items.map((item) => {
+            const label = variantLabel(item.color, item.size);
+            return (
+              <li key={item.variantId} className="flex justify-between gap-3">
+                <span>
+                  {item.quantity} × {item.name}
+                  {label && <span className="text-muted-foreground"> ({label})</span>}
+                </span>
+                <span className="tabular-nums">
+                  {formatPrice(item.unitPriceCents * item.quantity)}
+                </span>
+              </li>
+            );
+          })}
         </ul>
         <Separator className="my-4" />
         <div className="flex justify-between text-base font-medium">

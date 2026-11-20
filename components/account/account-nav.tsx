@@ -12,6 +12,12 @@ const LINKS = [
   { href: "/account/wishlist", label: "Wishlist" },
 ];
 
+/**
+ * Navegación lateral de "Mi cuenta" con la sección activa resaltada y el botón de salir.
+ *
+ * @example
+ * <AccountNav />
+ */
 export function AccountNav() {
   const pathname = usePathname();
 

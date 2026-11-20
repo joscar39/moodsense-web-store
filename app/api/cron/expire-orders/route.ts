@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 import { expireStaleManualOrders } from "@/lib/checkout/expire-orders";
 
 /**
- * Endpoint para cron (ej. Vercel Cron) que expira pedidos PENDING_PAYMENT
- * vencidos. Protegido por CRON_SECRET (Authorization: Bearer <secret>).
+ * GET /api/cron/expire-orders: endpoint para cron (ej. Vercel Cron) que expira
+ * pedidos PENDING_PAYMENT vencidos y devuelve su stock. Protegido por CRON_SECRET.
+ *
+ * @example
+ * fetch("/api/cron/expire-orders", { headers: { Authorization: `Bearer ${CRON_SECRET}` } })
+ * // 200 { data: { expired: 2 } } · 401 secreto ausente o incorrecto
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;

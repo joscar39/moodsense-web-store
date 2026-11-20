@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { discountPercent, formatPrice } from "@/lib/format/price";
 
+/** Datos que necesita una tarjeta de producto (precios en centavos). */
 export type ProductCardData = {
   slug: string;
   name: string;
@@ -14,6 +15,16 @@ export type ProductCardData = {
   inStock: boolean;
 };
 
+/**
+ * Tarjeta de producto para grillas: imagen, marca, nombre, precio y badges de
+ * descuento o agotado. Al hacer clic lleva a la ficha del producto.
+ *
+ * @example
+ * <ProductCard
+ *   product={{ slug: "cloud-heavy-hoodie", name: "Cloud Heavy Hoodie", brandName: "Atlas Supply",
+ *     priceCents: 8900, compareAtPriceCents: null, image: null, inStock: true }}
+ * />
+ */
 export function ProductCard({ product }: { product: ProductCardData }) {
   const onSale = product.compareAtPriceCents !== null;
 

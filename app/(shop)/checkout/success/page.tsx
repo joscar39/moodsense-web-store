@@ -12,6 +12,13 @@ export const metadata: Metadata = { title: "Pedido confirmado" };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+/**
+ * Página /checkout/success: vuelta desde Stripe. Busca el pedido por
+ * `session_id`, muestra el resumen (pagado o en proceso) y vacía el carrito.
+ *
+ * @example
+ * // URL: /checkout/success?session_id=cs_test_123
+ */
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
